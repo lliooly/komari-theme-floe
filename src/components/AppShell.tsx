@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import RemainingValueCalculator from "@/components/RemainingValueCalculator";
@@ -8,6 +9,18 @@ import { useEmbeddedThemeSettings } from "@/hooks/useEmbeddedThemeSettings";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const isEmbeddedThemeSettings = useEmbeddedThemeSettings();
+
+  useEffect(() => {
+    if (isEmbeddedThemeSettings) {
+      document.body.dataset.embeddedThemeSettings = "true";
+    } else {
+      delete document.body.dataset.embeddedThemeSettings;
+    }
+
+    return () => {
+      delete document.body.dataset.embeddedThemeSettings;
+    };
+  }, [isEmbeddedThemeSettings]);
 
   return (
     <>

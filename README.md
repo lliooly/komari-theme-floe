@@ -33,7 +33,7 @@ It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI**
   - **Bring your own background!** Use an image URL to set it as the background.
   - **Background Blur:** Add soft or glass blur effects to custom background images, with adjustable intensity.
   - **Card Blur:** Enable soft or glass card backgrounds, tune card transparency, and adjust extra blur separately.
-  - The Theme Settings page uses the same card background and glass blur system as the homepage.
+  - The embedded Theme Settings page keeps its page background transparent while using the same card background and glass blur system as the homepage.
   - **Ping stats display** Show package information at homepage straight away!
   - All settings persist locally and sync across theme changes
 

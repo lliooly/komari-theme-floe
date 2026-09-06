@@ -412,6 +412,16 @@ body[data-custom-background="true"]::after {
   background-color: black;
 }
 
+body[data-embedded-theme-settings="true"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+body[data-embedded-theme-settings="true"]::before,
+body[data-embedded-theme-settings="true"]::after {
+  display: none !important;
+}
+
 body[data-card-blur="true"] :is(
   [data-slot="card"]:not(.bg-transparent),
   [data-card-blur-surface="true"],
