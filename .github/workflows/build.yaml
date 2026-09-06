@@ -1,21 +1,25 @@
-name: Build and Release Theme
+name: Build and Release Floe Theme
 
 on:
   push:
     branches:
       - main
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: komari-theme-release-main
+  group: floe-theme-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-release:
-    if: ${{ github.ref == 'refs/heads/main' }}
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,75 +32,68 @@ jobs:
           node-version: "22"
           cache: npm
 
+      - name: Validate theme metadata
+        shell: bash
+        env:
+          EXPECTED_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          manifest_version="$(jq -r '.version // empty' komari-theme.json)"
+          manifest_short="$(jq -r '.short // empty' komari-theme.json)"
+          manifest_url="$(jq -r '.url // empty' komari-theme.json)"
+
+          [[ "$manifest_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::komari-theme.json version must be MAJOR.MINOR.PATCH; got: $manifest_version"
+            exit 1
+          }
+          test "$manifest_short" = "floe"
+          test "$manifest_url" = "$EXPECTED_REPOSITORY_URL"
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            [[ "$GITHUB_REF_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]] || {
+              echo "::error::release tags must use vMAJOR.MINOR.PATCH; got: $GITHUB_REF_NAME"
+              exit 1
+            }
+            tag_version="${BASH_REMATCH[1]}"
+            test "$manifest_version" = "$tag_version"
+          fi
+
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
       - name: Build static theme
         run: npm run build
 
-      - name: Prepare release metadata
-        id: metadata
-        shell: bash
-        env:
-          REPOSITORY: ${{ github.repository }}
-          SERVER_URL: ${{ github.server_url }}
-          RUN_NUMBER: ${{ github.run_number }}
-          COMMIT_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-
-          source_version="$(jq -r '.version // empty' komari-theme.json)"
-          if [[ "$source_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            major="${BASH_REMATCH[1]}"
-            minor="${BASH_REMATCH[2]}"
-            source_patch="${BASH_REMATCH[3]}"
-          else
-            echo "::error::komari-theme.json version must be MAJOR.MINOR.PATCH; got: $source_version"
-            exit 1
-          fi
-
-          patch=$((10#$source_patch + 10#$RUN_NUMBER))
-          short_sha="${COMMIT_SHA:0:7}"
-          version="${major}.${minor}.${patch}-dev.${short_sha}"
-          repository_url="${SERVER_URL}/${REPOSITORY}"
-          tag="v${version}"
-
-          jq \
-            --arg version "$version" \
-            --arg url "$repository_url" \
-            '.version = $version | .url = $url' \
-            komari-theme.json > komari-theme.generated.json
-          mv komari-theme.generated.json komari-theme.json
-
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "repository_url=$repository_url" >> "$GITHUB_OUTPUT"
-
       - name: Verify theme files
         shell: bash
+        env:
+          EXPECTED_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
           set -euo pipefail
 
           test -f preview.png
           test -f komari-theme.json
           test -d dist
+          test -f dist/index.html
           jq empty komari-theme.json
-          test "$(jq -r '.short' komari-theme.json)" = "next"
-          test "$(jq -r '.url' komari-theme.json)" = "${{ steps.metadata.outputs.repository_url }}"
+          test "$(jq -r '.short' komari-theme.json)" = "floe"
+          test "$(jq -r '.url' komari-theme.json)" = "$EXPECTED_REPOSITORY_URL"
 
       - name: Create Komari theme package
         shell: bash
         run: |
           set -euo pipefail
 
-          rm -rf theme-package dist-release.zip
-          mkdir -p theme-package
-          cp preview.png komari-theme.json theme-package/
-          cp -R dist theme-package/
+          package_dir="$(mktemp -d "${RUNNER_TEMP}/floe-theme.XXXXXX")"
+          trap 'rm -rf "$package_dir"' EXIT
+
+          cp preview.png komari-theme.json "$package_dir/"
+          cp -R dist "$package_dir/"
 
           (
-            cd theme-package
-            zip -qr ../dist-release.zip .
+            cd "$package_dir"
+            zip -qr "$GITHUB_WORKSPACE/dist-release.zip" .
           )
 
           unzip -tq dist-release.zip
@@ -104,33 +101,66 @@ jobs:
           unzip -Z1 dist-release.zip | grep -Fxq "preview.png"
           unzip -Z1 dist-release.zip | grep -q '^dist/'
 
-      - name: Publish latest GitHub Release
+      - name: Upload theme package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: floe-theme-package
+          path: dist-release.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download theme package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: floe-theme-package
+          path: release-assets
+
+      - name: Publish GitHub Release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
           COMMIT_SHA: ${{ github.sha }}
-          RELEASE_TAG: ${{ steps.metadata.outputs.tag }}
-          RELEASE_VERSION: ${{ steps.metadata.outputs.version }}
         run: |
           set -euo pipefail
 
-          notes="Automated Komari theme build for commit ${COMMIT_SHA}."
+          package_path="release-assets/dist-release.zip"
+          test -f "$package_path"
+
+          version="${RELEASE_TAG#v}"
+          sha256="$(sha256sum "$package_path" | awk '{print $1}')"
+          notes="$(cat <<EOF
+          Floe ${version} theme package.
+
+          SHA-256: \`${sha256}\`
+
+          Built from commit ${COMMIT_SHA}.
+          EOF
+          )"
 
           if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" dist-release.zip \
+            gh release upload "$RELEASE_TAG" "$package_path" \
               --repo "$REPOSITORY" \
               --clobber
             gh release edit "$RELEASE_TAG" \
               --repo "$REPOSITORY" \
-              --title "Komari Next ${RELEASE_VERSION}" \
+              --title "Floe ${version}" \
               --notes "$notes" \
               --latest
           else
-            gh release create "$RELEASE_TAG" dist-release.zip \
+            gh release create "$RELEASE_TAG" "$package_path" \
               --repo "$REPOSITORY" \
-              --target "$COMMIT_SHA" \
-              --title "Komari Next ${RELEASE_VERSION}" \
+              --verify-tag \
+              --title "Floe ${version}" \
               --notes "$notes" \
               --latest
           fi

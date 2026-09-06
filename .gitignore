@@ -18,6 +18,7 @@
 /build
 /dist
 /dist-ssr
+/dist-release.zip
 
 # Misc
 .DS_Store

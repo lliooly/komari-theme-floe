@@ -1,184 +1,59 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Komari Theme Build Script
-# This script builds the theme package locally
+set -euo pipefail
 
-set -e  # Exit on any error
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
 
-echo "Building Komari Theme Package..."
+echo "Building Floe Komari theme package..."
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+for command_name in node npm jq zip unzip; do
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    echo "Error: required command not found: $command_name" >&2
+    exit 1
+  fi
+done
 
-# Function to print colored output
-print_status() {
-    echo -e "${NC} $1"
+npm ci --no-audit --no-fund
+npm run build
+
+test -f preview.png
+test -f komari-theme.json
+test -d dist
+test -f dist/index.html
+jq empty komari-theme.json
+
+manifest_version="$(jq -r '.version // empty' komari-theme.json)"
+manifest_short="$(jq -r '.short // empty' komari-theme.json)"
+manifest_url="$(jq -r '.url // empty' komari-theme.json)"
+
+[[ "$manifest_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+  echo "Error: komari-theme.json version must be MAJOR.MINOR.PATCH" >&2
+  exit 1
 }
+test "$manifest_short" = "floe"
+test "$manifest_url" = "https://github.com/lliooly/komari-theme-floe"
 
-print_success() {
-    echo -e "${GREEN} $1${NC}"
-}
+package_dir="$(mktemp -d "${TMPDIR:-/tmp}/floe-theme.XXXXXX")"
+trap 'rm -rf "$package_dir"' EXIT
 
-print_warning() {
-    echo -e "${YELLOW} $1${NC}"
-}
+cp preview.png komari-theme.json "$package_dir/"
+cp -R dist "$package_dir/"
+rm -f dist-release.zip
+(
+  cd "$package_dir"
+  zip -qr "$ROOT_DIR/dist-release.zip" .
+)
 
-print_error() {
-    echo -e "${RED}[ERROR] $1${NC}"
-}
+unzip -tq dist-release.zip
+unzip -Z1 dist-release.zip | grep -Fxq "komari-theme.json"
+unzip -Z1 dist-release.zip | grep -Fxq "preview.png"
+unzip -Z1 dist-release.zip | grep -q '^dist/'
 
-# Check if required commands exist
-check_dependencies() {
-    print_status "Checking dependencies..."
-    
-    if ! command -v node &> /dev/null; then
-        print_error "Node.js is not installed"
-        exit 1
-    fi
-    
-    if ! command -v npm &> /dev/null; then
-        print_error "npm is not installed"
-        exit 1
-    fi
-    
-    if ! command -v zip &> /dev/null; then
-        print_error "zip is not installed"
-        exit 1
-    fi
-    
-    print_success "All dependencies are available"
-}
+if command -v sha256sum >/dev/null 2>&1; then
+  sha256sum dist-release.zip
+else
+  shasum -a 256 dist-release.zip
+fi
 
-# Install dependencies
-install_dependencies() {
-    print_status "Installing dependencies..."
-    npm install
-    print_success "Dependencies installed"
-}
-
-# Build the project
-build_project() {
-    print_status "Building project..."
-    npm run build
-    print_success "Project built successfully"
-}
-
-# Update theme configuration
-update_theme_config() {
-    print_status "Updating theme configuration..."
-    
-    # Get current date in YY.MM.DD format
-    VERSION_DATE=$(date +"%y.%m.%d")
-    # Get commit hash (short)
-    if git rev-parse --short HEAD &> /dev/null; then
-        COMMIT_HASH=$(git rev-parse --short HEAD)
-    else
-        COMMIT_HASH="dev"
-        print_warning "Not a git repository, using 'dev' as commit hash"
-    fi
-    
-    echo "Version: $VERSION_DATE"
-    echo "Commit: $COMMIT_HASH"
-
-}
-
-# Verify required files exist
-verify_files() {
-    print_status "Verifying required files..."
-    
-    local files_missing=false
-    
-    if [ ! -f "preview.png" ]; then
-        print_error "preview.png not found"
-        files_missing=true
-    fi
-    
-    if [ ! -f "komari-theme.json" ]; then
-        print_error "komari-theme.json not found"
-        files_missing=true
-    fi
-    
-    if [ ! -d "dist" ]; then
-        print_error "dist/ directory not found"
-        files_missing=true
-    fi
-    
-    if [ "$files_missing" = true ]; then
-        print_error "Some required files are missing"
-        exit 1
-    fi
-    
-    print_success "All required files found!"
-}
-
-# Create theme package
-create_package() {
-    print_status "Creating theme package..."
-    
-    # Get version info
-    VERSION_DATE=$(date +"%y.%m.%d")
-    if git rev-parse --short HEAD &> /dev/null; then
-        COMMIT_HASH=$(git rev-parse --short HEAD)
-    else
-        COMMIT_HASH="dev"
-    fi
-    
-    # Create a temporary directory for the package
-    rm -rf theme-package
-    mkdir -p theme-package
-    
-    # Copy required files
-    cp preview.png theme-package/
-    cp komari-theme.json theme-package/
-    cp -r dist/ theme-package/
-    
-    # Create zip file with version and commit hash
-    ZIP_NAME="komari-theme-v${VERSION_DATE}-${COMMIT_HASH}.zip"
-    
-    cd theme-package
-    zip -r "../dist/${ZIP_NAME}" .
-    cd ..
-    
-    # Clean up
-    rm -rf theme-package
-    
-    print_success "Created package: ${ZIP_NAME}"
-    ls -la "dist/${ZIP_NAME}"
-}
-
-# Main execution
-main() {
-    echo "======================================"
-    echo "  Komari Theme Package Builder"
-    echo "======================================"
-    echo
-    
-    check_dependencies
-    echo
-    
-    install_dependencies
-    echo
-    
-    build_project
-    echo
-    
-    update_theme_config
-    echo
-    
-    verify_files
-    echo
-    
-    create_package
-    echo
-    
-    print_success "Theme package build completed! 🎉"
-    echo
-    echo "You can now use the generated zip file as a theme package."
-}
-
-# Run main function
-main "$@"
+echo "Floe theme package created: $ROOT_DIR/dist-release.zip"
