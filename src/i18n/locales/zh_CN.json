@@ -960,6 +960,50 @@
     },
     "themeSettings": "主题设置"
   },
+  "themeSettingsPage": {
+    "back": "返回仪表板",
+    "description": "调整 Floe 的默认表现，并将设置发布给此 Komari 实例的所有访客。",
+    "general": {
+      "appearance": "默认外观",
+      "appearanceHelp": "访客仍然可以在自己的浏览器中切换外观。",
+      "appearances": {
+        "dark": "深色",
+        "light": "浅色",
+        "system": "跟随系统"
+      },
+      "apply": "应用",
+      "clear": "清除",
+      "description": "这些值会作为所有访客使用的共享默认配置。",
+      "language": "默认语言",
+      "languageHelp": "选择访客默认看到的语言。",
+      "languages": {
+        "en": "English",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "logoHelp": "留空则使用 Floe 内置标志。",
+      "logoPlaceholder": "https://example.com/logo.svg",
+      "logoUrl": "Logo 图片 URL",
+      "title": "Floe 默认设置"
+    },
+    "loading": "正在加载主题设置…",
+    "title": "主题设置",
+    "unauthorized": "需要登录",
+    "unauthorizedHelp": "只有 Komari 管理员可以修改全局主题设置。",
+    "uptimeKuma": {
+      "apply": "保存 Uptime Kuma",
+      "baseUrl": "Uptime Kuma 地址",
+      "baseUrlHelp": "填写不带路径、查询参数或片段的 Uptime Kuma 站点地址。",
+      "baseUrlPlaceholder": "https://status.example.com",
+      "description": "可选：从 Uptime Kuma 状态页展示公开监控状态。",
+      "enabled": "启用 Uptime Kuma",
+      "enabledHelp": "URL 和 slug 有效时，状态页会显示在仪表板中。",
+      "slug": "状态页 slug",
+      "slugHelp": "填写公开状态页 URL 中的 slug。",
+      "slugPlaceholder": "main",
+      "title": "Uptime Kuma 状态页"
+    }
+  },
   "time": {
     "ago": "前",
     "minute": "分钟",

@@ -72,6 +72,7 @@ interface ThemeContextType {
   themeConfig: ThemeConfig;
   managedThemeSettings: ManagedThemeSettings;
   isThemeSettingsAdmin: boolean;
+  isThemeSettingsAdminReady: boolean;
   isThemeLoaded: boolean;
   isLoggedIn: boolean;
   statusCardsVisibility: StatusCardsVisibility;
@@ -100,6 +101,8 @@ interface ThemeContextType {
   setNodeViewMode: (value: NodeViewMode) => void;
   setAppearance: (value: Appearance) => void;
   setLanguage: (value: string) => void;
+  setLogoUrl: (value: string) => void;
+  setUptimeKuma: (patch: Partial<UptimeKumaSettings>) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -1322,12 +1325,25 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     },
     [applyAdminOrLocalPatch]
   );
+  const setLogoUrlValue = useCallback(
+    (value: string) => {
+      applyAdminOrLocalPatch({ logoUrl: value.trim() });
+    },
+    [applyAdminOrLocalPatch]
+  );
+  const setUptimeKumaValue = useCallback(
+    (patch: Partial<UptimeKumaSettings>) => {
+      applyAdminOrLocalPatch({ uptimeKuma: patch });
+    },
+    [applyAdminOrLocalPatch]
+  );
 
   const value = useMemo<ThemeContextType>(
     () => ({
       themeConfig,
       managedThemeSettings,
       isThemeSettingsAdmin: adminState === "yes",
+      isThemeSettingsAdminReady: adminState !== "loading",
       isThemeLoaded,
       isLoggedIn,
       statusCardsVisibility,
@@ -1356,6 +1372,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setNodeViewMode: setNodeViewModeValue,
       setAppearance: setAppearanceValue,
       setLanguage: setLanguageValue,
+      setLogoUrl: setLogoUrlValue,
+      setUptimeKuma: setUptimeKumaValue,
     }),
     [
       appearance,
@@ -1387,6 +1405,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setNodeViewModeValue,
       setStatusCardVisibility,
       setStatusDesign,
+      setLogoUrlValue,
+      setUptimeKumaValue,
       statusCardsVisibility,
       themeConfig,
     ]

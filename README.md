@@ -48,6 +48,7 @@ It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI**
 
 - **Node.js** 22 or newer (LTS recommended)
 - A running **Komari backend** (API) reachable from the browser
+- **Komari 1.2.1 or newer** for Floe's custom Theme Settings page
 
 ## Getting Started
 
@@ -139,7 +140,7 @@ These settings can improve navigation smoothness, make deployments more compatib
 
 ### Scheduled announcements
 
-Configure Announcement in the Komari admin theme settings: enable it, enter Markdown, and set start/end timestamps with a timezone, such as `2026-09-05T18:00:00+08:00`. Alternatively, sign in on the frontend and open Theme settings → Manage announcement for date/time pickers, live preview and a Disable now button.
+Sign in on the frontend and open Theme settings → Announcement management. Floe provides a date/time picker, live preview and a Disable now button; the settings are saved as shared theme configuration for all visitors. This custom Theme Settings page requires Komari 1.2.1 or newer.
 
 The announcement stays pinned below navigation on the dashboard and instance pages as a separate glass island. Long content scrolls inside the banner. Headings, lists, links, code and tables are supported; HTML and images are disabled. Choose one of the four supported text colors: white, green, yellow or red. The banner hides at expiry while retaining its configuration. Empty content and invalid schedules remain hidden.
 

@@ -696,6 +696,50 @@
     "title": "Settings"
   },
   "status_settings": "Status Settings",
+  "themeSettingsPage": {
+    "title": "Theme settings",
+    "description": "Tune Floe's defaults and publish them to every visitor of this Komari instance.",
+    "loading": "Loading theme settings…",
+    "unauthorized": "Sign-in required",
+    "unauthorizedHelp": "Only the Komari administrator can change theme-wide settings.",
+    "back": "Back to dashboard",
+    "general": {
+      "title": "Floe defaults",
+      "description": "These values are applied as the shared starting point for visitors.",
+      "logoUrl": "Logo image URL",
+      "logoPlaceholder": "https://example.com/logo.svg",
+      "logoHelp": "Leave empty to use Floe's built-in mark.",
+      "apply": "Apply",
+      "clear": "Clear",
+      "appearance": "Default appearance",
+      "appearanceHelp": "Visitors can still switch appearance locally.",
+      "appearances": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "language": "Default language",
+      "languageHelp": "Choose the language shown to visitors by default.",
+      "languages": {
+        "en": "English",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      }
+    },
+    "uptimeKuma": {
+      "title": "Uptime Kuma status page",
+      "description": "Optionally show public monitor status from an Uptime Kuma status page.",
+      "enabled": "Enable Uptime Kuma",
+      "enabledHelp": "The status page appears when the URL and slug are valid.",
+      "baseUrl": "Uptime Kuma URL",
+      "baseUrlPlaceholder": "https://status.example.com",
+      "baseUrlHelp": "Use the Uptime Kuma origin without a path, query or hash.",
+      "slug": "Status page slug",
+      "slugPlaceholder": "main",
+      "slugHelp": "The slug from the public status page URL.",
+      "apply": "Save Uptime Kuma"
+    }
+  },
   "themeCustomizer": {
     "themeSettings": "Theme settings",
     "colorTheme": "Color Theme",

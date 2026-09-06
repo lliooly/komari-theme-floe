@@ -12,6 +12,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { dispatchOpenRemainingValueCalculatorEvent } from "@/lib/remainingValueEvents";
 import { useEffect, useState } from "react";
+import { useSpaPathname } from "@/hooks/useSpaPathname";
 
 const NAVBAR_COMPACT_SCROLL_THRESHOLD = 16;
 
@@ -43,6 +44,7 @@ const NavBar = () => {
   const { publicInfo } = usePublicInfo();
   const { guestDisplay, managedThemeSettings } = useTheme();
   const { t } = useTranslation();
+  const pathname = useSpaPathname();
   const logoUrl = getSupportedLogoUrl(managedThemeSettings.logoUrl);
   const [logoLoadFailed, setLogoLoadFailed] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -69,6 +71,7 @@ const NavBar = () => {
   }, []);
 
   const showCustomLogo = Boolean(logoUrl) && !logoLoadFailed;
+  const isThemeSettingsPage = pathname.replace(/\/+$/, "").endsWith("/settings");
 
   return (
     <nav className="w-full rounded-2xl border-0 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 shadow-sm transition-all duration-300 motion-reduce:transition-none">
@@ -122,7 +125,7 @@ const NavBar = () => {
           }`}
         >
           <DarkModeToggle />
-          <ThemeSwitcher />
+          {!isThemeSettingsPage && <ThemeSwitcher />}
           {guestDisplay.showPrice && guestDisplay.showExpiredAt && (
             <Button
               type="button"

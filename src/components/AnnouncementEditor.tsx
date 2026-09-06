@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Megaphone, Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,9 @@ const announcementTextColorOptions: ReadonlyArray<{
 ];
 
 function EditorForm() {
-  const { announcement, accept, now } = useAnnouncement();
+  const { announcement, loaded, accept, now } = useAnnouncement();
   const { t } = useTranslation();
+  const hydratedRef = useRef(false);
   const [enabled, setEnabled] = useState(announcement.enabled);
   const [content, setContent] = useState(announcement.content);
   const [start, setStart] = useState(localDateTime(announcement.startsAt));
@@ -48,6 +49,19 @@ function EditorForm() {
   useEffect(() => {
     setTimezone(getSystemTimeZone());
   }, []);
+
+  useEffect(() => {
+    if (!loaded || hydratedRef.current) {
+      return;
+    }
+
+    hydratedRef.current = true;
+    setEnabled(announcement.enabled);
+    setContent(announcement.content);
+    setStart(localDateTime(announcement.startsAt));
+    setEnd(localDateTime(announcement.endsAt));
+    setTextColor(announcement.textColor);
+  }, [announcement, loaded]);
 
   const save = async (disable = false) => {
     setError("");
@@ -79,7 +93,7 @@ function EditorForm() {
 
   return <form className="min-w-0 space-y-4" onSubmit={(event) => { event.preventDefault(); void save(); }}>
     <p className="text-sm text-muted-foreground">{t("announcement.statusLabel")}: {t(`announcement.status.${announcementStatus(announcement, now)}`)}</p>
-    <fieldset disabled={saving} className="min-w-0 space-y-4">
+    <fieldset disabled={saving || !loaded} className="min-w-0 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <label htmlFor="announcement-enabled">{t("announcement.enabled")}</label>
         <Switch id="announcement-enabled" checked={enabled} onCheckedChange={setEnabled} />
@@ -155,11 +169,33 @@ function EditorForm() {
   </form>;
 }
 
-export default function AnnouncementEditor() {
+type AnnouncementEditorProps = {
+  variant?: "dialog" | "inline";
+};
+
+export default function AnnouncementEditor({ variant = "dialog" }: AnnouncementEditorProps) {
   const { isThemeSettingsAdmin } = useTheme();
   const { loaded } = useAnnouncement();
   const { t } = useTranslation();
   if (!isThemeSettingsAdmin) return null;
+
+  if (variant === "inline") {
+    return (
+      <section className="rounded-2xl border border-border/70 bg-card/35 p-4 shadow-sm md:p-6">
+        <div className="mb-5 flex items-start gap-3">
+          <div className="rounded-xl bg-primary/10 p-2 text-primary">
+            <Megaphone className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold tracking-tight">{t("announcement.manage")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t("announcement.description")}</p>
+          </div>
+        </div>
+        <EditorForm />
+      </section>
+    );
+  }
+
   return <Dialog>
     <DialogTrigger asChild><Button type="button" variant="outline" className="w-full justify-start" disabled={!loaded}><Megaphone className="h-4 w-4" aria-hidden="true" />{t("announcement.manage")}</Button></DialogTrigger>
     <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl grid-cols-1 overflow-y-auto">

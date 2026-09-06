@@ -30,8 +30,13 @@ import {
 import { useNodeViewMode } from '@/hooks/useNodeViewMode';
 import { cn } from '@/lib/utils';
 import AnnouncementEditor from './AnnouncementEditor';
+import ThemeSettingsDefaults from './ThemeSettingsDefaults';
 
-const ThemeSwitcher = () => {
+type ThemeSwitcherProps = {
+  variant?: 'popover' | 'page';
+};
+
+const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
   const {
     themeConfig,
     setColorTheme,
@@ -204,21 +209,19 @@ const ThemeSwitcher = () => {
     },
   ];
 
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <Palette className="h-4 w-4" />
-          <span className="sr-only">
-            {t('themeCustomizer.themeSettings', { defaultValue: 'Theme settings' })}
-          </span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 max-h-[85vh] overflow-y-auto p-4" align="end" sideOffset={8}>
-        <div className="flex flex-col gap-4">
-          <AnnouncementEditor />
-          <div>
-            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 sticky -top-4 bg-popover pb-2 z-10 -mx-4 px-4 pt-4">
+  const settingsPanel = (
+    <div className={variant === 'page' ? 'flex flex-col gap-6' : 'flex flex-col gap-4'}>
+      {variant === 'page' && <ThemeSettingsDefaults />}
+      <AnnouncementEditor variant={variant === 'page' ? 'inline' : 'dialog'} />
+          <div className={cn(
+            variant === 'page' && 'rounded-2xl border border-border/70 bg-card/35 p-4 shadow-sm md:p-6',
+          )}>
+            <h4 className={cn(
+              'font-semibold text-sm mb-3 flex items-center gap-2',
+              variant === 'page'
+                ? 'border-b border-border/60 pb-3'
+                : 'sticky -top-4 z-10 -mx-4 bg-popover px-4 pb-2 pt-4',
+            )}>
               <Palette className="h-4 w-4" />
               {t('themeCustomizer.colorTheme', { defaultValue: 'Color Theme' })}
             </h4>
@@ -691,7 +694,25 @@ const ThemeSwitcher = () => {
               )}
             </div>
           </div>
-        </div>
+    </div>
+  );
+
+  if (variant === 'page') {
+    return settingsPanel;
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-9 w-9">
+          <Palette className="h-4 w-4" />
+          <span className="sr-only">
+            {t('themeCustomizer.themeSettings', { defaultValue: 'Theme settings' })}
+          </span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 max-h-[85vh] overflow-y-auto p-4" align="end" sideOffset={8}>
+        {settingsPanel}
       </PopoverContent>
     </Popover>
   );

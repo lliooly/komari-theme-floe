@@ -696,6 +696,50 @@
     "title": "設置"
   },
   "status_settings": "狀態顯示設置",
+  "themeSettingsPage": {
+    "title": "主題設定",
+    "description": "調整 Floe 的預設外觀，並將設定套用到此 Komari 實例的所有訪客。",
+    "loading": "正在載入主題設定…",
+    "unauthorized": "需要登入",
+    "unauthorizedHelp": "只有 Komari 管理員可以修改全域主題設定。",
+    "back": "返回儀表板",
+    "general": {
+      "title": "Floe 預設設定",
+      "description": "這些值會作為所有訪客使用的共用預設設定。",
+      "logoUrl": "Logo 圖片 URL",
+      "logoPlaceholder": "https://example.com/logo.svg",
+      "logoHelp": "留空則使用 Floe 內建標誌。",
+      "apply": "套用",
+      "clear": "清除",
+      "appearance": "預設外觀",
+      "appearanceHelp": "訪客仍可在自己的瀏覽器中切換外觀。",
+      "appearances": {
+        "system": "跟隨系統",
+        "light": "淺色",
+        "dark": "深色"
+      },
+      "language": "預設語言",
+      "languageHelp": "選擇訪客預設看到的語言。",
+      "languages": {
+        "en": "English",
+        "zh-CN": "簡體中文",
+        "zh-TW": "繁體中文"
+      }
+    },
+    "uptimeKuma": {
+      "title": "Uptime Kuma 狀態頁",
+      "description": "可選：從 Uptime Kuma 狀態頁顯示公開監控狀態。",
+      "enabled": "啟用 Uptime Kuma",
+      "enabledHelp": "URL 和 slug 有效時，狀態頁會顯示在儀表板中。",
+      "baseUrl": "Uptime Kuma 位址",
+      "baseUrlPlaceholder": "https://status.example.com",
+      "baseUrlHelp": "填寫不含路徑、查詢參數或片段的 Uptime Kuma 網址。",
+      "slug": "狀態頁 slug",
+      "slugPlaceholder": "main",
+      "slugHelp": "填寫公開狀態頁 URL 中的 slug。",
+      "apply": "儲存 Uptime Kuma"
+    }
+  },
   "themeCustomizer": {
     "themeSettings": "主題設定",
     "colorTheme": "顏色主題",
