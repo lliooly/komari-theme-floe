@@ -76,7 +76,10 @@ export default function ThemeSettingsDefaults() {
 
   return (
     <>
-      <section className="rounded-2xl border border-border/70 bg-card/35 p-4 shadow-sm md:p-6">
+      <section
+        data-card-blur-surface="true"
+        className="rounded-2xl border border-border/70 bg-card/35 p-4 shadow-sm md:p-6"
+      >
         <div className="mb-5 flex items-start gap-3">
           <div className="rounded-xl bg-primary/10 p-2 text-primary">
             <Palette className="h-5 w-5" aria-hidden="true" />
@@ -180,7 +183,10 @@ export default function ThemeSettingsDefaults() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border/70 bg-card/35 p-4 shadow-sm md:p-6">
+      <section
+        data-card-blur-surface="true"
+        className="rounded-2xl border border-border/70 bg-card/35 p-4 shadow-sm md:p-6"
+      >
         <div className="mb-5 flex items-start gap-3">
           <div className="rounded-xl bg-primary/10 p-2 text-primary">
             <Server className="h-5 w-5" aria-hidden="true" />

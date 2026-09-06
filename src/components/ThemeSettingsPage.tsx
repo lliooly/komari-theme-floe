@@ -23,7 +23,10 @@ export default function ThemeSettingsPage() {
   if (!isThemeLoaded || !isThemeSettingsAdminReady) {
     return (
       <div className={pageContainerClassName}>
-        <div className="rounded-2xl border border-border/70 bg-card/35 p-8 text-center text-sm text-muted-foreground">
+        <div
+          data-card-blur-surface="true"
+          className="rounded-2xl border border-border/70 bg-card/35 p-8 text-center text-sm text-muted-foreground"
+        >
           {t("themeSettingsPage.loading")}
         </div>
       </div>
@@ -33,7 +36,10 @@ export default function ThemeSettingsPage() {
   if (!isThemeSettingsAdmin) {
     return (
       <div className={pageContainerClassName}>
-        <div className="mx-auto max-w-lg rounded-2xl border border-border/70 bg-card/35 p-8 text-center shadow-sm">
+        <div
+          data-card-blur-surface="true"
+          className="mx-auto max-w-lg rounded-2xl border border-border/70 bg-card/35 p-8 text-center shadow-sm"
+        >
           <LockKeyhole className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
           <h1 className="mt-4 text-xl font-semibold">{t("themeSettingsPage.unauthorized")}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
