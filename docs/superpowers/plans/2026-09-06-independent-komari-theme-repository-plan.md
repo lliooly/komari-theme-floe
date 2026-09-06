@@ -6,7 +6,7 @@
 
 ## 执行前置条件
 
-- 用户先确定新仓库的准确名称和完整 URL。计划不自行猜测仓库名，也不在名称确定前改写主题 manifest。
+- 主题名称已确定为 Floe，计划仓库名为 `komari-theme-floe`，主题短名为 `floe`。实际迁移仍需用户提供新仓库创建后的准确 URL。
 - 新仓库必须是公开的独立仓库，不创建为原项目的 fork。
 - 新仓库创建时不自动初始化 README、LICENSE、.gitignore 或其他首个提交，避免产生与当前历史无关的根提交。
 - 迁移源以实际开始迁移时的当前 HEAD 为准；迁移前确认工作区没有用户未提交的代码改动。
@@ -17,7 +17,7 @@
 
 由用户在 GitHub 创建空的公开仓库，并完成以下基础设置：
 
-- 使用不包含 next 的独立主题名称，例如 komari-theme-加主题标识。
+- 使用独立主题名称 `komari-theme-floe`，主题展示名为 `Floe`，不再使用 `Komari Next` 或 `next`。
 - 设置简短描述，明确这是 Komari 的第三方主题。
 - 默认分支使用 main。
 - 开启 Issues；是否开启 Discussions 不影响本计划。
@@ -69,15 +69,15 @@ README 中只允许在来源致谢和许可证说明中保留原项目 URL。运
 
 修改 komari-theme.json：
 
-- 将 name 改为最终主题显示名称。
-- 将 short 改为新主题唯一短名称，不再使用 next。
-- 将 description 改为新主题定位和 UI 特色。
+- 将 name 改为 `Floe`。
+- 将 short 改为唯一短名称 `floe`，不再使用 `next`。
+- 将 description 改为 Floe 的流动数据、柔和层次和实时反馈定位。
 - 将 version 重置为独立主题自己的版本序列，首个开发版本建议为 0.1.0。
 - 将 author 改为当前维护者或维护团队。
 - 将 url 改为新独立仓库 URL。
 - 保留 preview 的相对路径，并确认主题包内存在对应文件。
 
-最终主题名称、仓库名和 short 必须在首个 Release 前确定。名称确定前不发布主题包。
+主题名称、仓库名和 short 已确定；实际仓库 URL 仍须在首个 Release 前确认，不发布指向占位地址的主题包。
 
 ### 运行时品牌链接
 
@@ -274,16 +274,15 @@ GitHub Actions 只使用当前仓库的 GITHUB_TOKEN，并限制为 contents: wr
 
 执行顺序：
 
-1. 用户确定新仓库名称和 URL。
-2. 创建空的公开独立仓库。
-3. 迁移完整历史并验证远程内容。
-4. 切换 origin，移除 upstream。
-5. 更新项目身份、来源说明、Footer 和 manifest。
-6. 完成许可证和资源审计。
-7. 迁移并验证 Komari manifest 配置。
-8. 更新 CI、打包和 Release 工作流。
-9. 运行完整验证。
-10. 创建首个稳定 Release 并提交主题市场。
+1. 用户创建空的公开独立仓库，并提供准确 URL。
+2. 迁移完整历史并验证远程内容。
+3. 切换 origin，移除 upstream。
+4. 更新项目身份、来源说明、Footer 和 manifest。
+5. 完成许可证和资源审计。
+6. 迁移并验证 Komari manifest 配置。
+7. 更新 CI、打包和 Release 工作流。
+8. 运行完整验证。
+9. 创建首个稳定 Release 并提交主题市场。
 
 以下情况立即停止发布流程，但保留已完成的本地可恢复改动：
 

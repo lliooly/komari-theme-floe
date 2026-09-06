@@ -1,18 +1,18 @@
-# Komari-Next
+# Floe
 
-Komari-Next is a modern frontend for the Komari monitoring project.  
+Floe is an independently maintained third-party theme for the Komari monitoring project.
 It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI** and packaged as a static site that can be used as a Komari theme.
 
-[中文](https://github.com/tonyliuzj/komari-next/blob/main/README-CN.md)
+[中文](./README-CN.md)
 
 [Demo](https://komari.probe.name)
 
-[Download theme file](https://github.com/tonyliuzj/komari-next/releases/latest/download/dist-release.zip)
+[Download theme file](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip)
 
 > This repository contains only the frontend. You will need a running Komari backend instance for the UI to talk to. Or you can download the theme file and upload it through Komari's admin dashboard, this would be the recommanded way.
 
-![preview](https://github.com/tonyliuzj/komari-next/blob/main/preview.png?raw=true)
-![dark-theme](https://github.com/tonyliuzj/komari-next/blob/main/images/dark-theme.png?raw=true)
+![preview](https://github.com/lliooly/komari-theme-floe/blob/main/preview.png?raw=true)
+![dark-theme](https://github.com/lliooly/komari-theme-floe/blob/main/images/dark-theme.png?raw=true)
 
 ## Features
 
@@ -51,7 +51,7 @@ It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI**
 
 ## Getting Started
 
-- Simply [download theme file](https://github.com/tonyliuzj/komari-next/releases/latest/download/dist-release.zip) and upload it through Komari's admin dashboard, this would be the recommanded way.
+- Simply [download the theme file](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip) and upload it through Komari's admin dashboard. This is the recommended way to install Floe.
 
 ## Dev
 
@@ -169,17 +169,25 @@ This repository is designed to be used as a custom Komari theme.
 Contributions are welcome.  
 If you find issues or have ideas for improvements, feel free to open an issue or submit a pull request.
 
-## Thanks
+## Source and acknowledgements
+
+Floe is an independently maintained third-party Komari theme. Part of its codebase is based on [Komari Next](https://github.com/tonyliuzj/komari-next), in tribute to its original author, Tony Liu. The UI, interaction details and future development of Floe are maintained independently by 豕豕豕. This project is not an official Komari or Komari Next release and does not represent either project's endorsement.
+
+[Komari Next](https://github.com/tonyliuzj/komari-next) provided the initial technical foundation.
 [piphase/komari-nexus](https://github.com/piphase/komari-nexus)
 [fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro)
-[Contributors](https://github.com/tonyliuzj/komari-next/graphs/contributors)
+[Contributors](https://github.com/lliooly/komari-theme-floe/graphs/contributors)
+
+## License
+
+Floe is released under the MIT License. The original copyright and license notice are preserved in [LICENSE](./LICENSE).
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=tonyliuzj%2Fkomari-next&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=lliooly%2Fkomari-theme-floe&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=tonyliuzj/komari-next&type=date&theme=dark&legend=top-left&sealed_token=CCb4HaFrtIea3tojdQVji_QIeCJJHLXCQcsf6DwFBymwadAojyZYZHNNlGA90MkDL1_d92L0HKj-kect88HQMggc_whTLHzsoBEh4ITSC1qGT8QJmyMQEA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=tonyliuzj/komari-next&type=date&legend=top-left&sealed_token=CCb4HaFrtIea3tojdQVji_QIeCJJHLXCQcsf6DwFBymwadAojyZYZHNNlGA90MkDL1_d92L0HKj-kect88HQMggc_whTLHzsoBEh4ITSC1qGT8QJmyMQEA" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=tonyliuzj/komari-next&type=date&legend=top-left&sealed_token=CCb4HaFrtIea3tojdQVji_QIeCJJHLXCQcsf6DwFBymwadAojyZYZHNNlGA90MkDL1_d92L0HKj-kect88HQMggc_whTLHzsoBEh4ITSC1qGT8QJmyMQEA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
  </picture>
 </a>

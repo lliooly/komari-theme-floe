@@ -1,15 +1,15 @@
 {
-    "name": "Komari Next",
-    "short": "next",
-    "description": "NextJS theme for Komari Monitor",
-    "version": "1.4.19",
-    "author": "tonyliuzj",
-    "url": "https://github.com/lliooly/komari-next",
+    "name": "Floe",
+    "short": "floe",
+    "description": "A fluid Komari theme built around live data, soft layers and responsive feedback.",
+    "version": "0.1.0",
+    "author": "豕豕豕",
+    "url": "https://github.com/lliooly/komari-theme-floe",
     "preview": "preview.png",
     "configuration": {
         "name": "Theme Settings",
         "icon": "Palette",
-        "description": "Komari Next theme defaults",
+        "description": "Floe theme defaults",
         "managedFields": [
             {
                 "key": "logoUrl",
