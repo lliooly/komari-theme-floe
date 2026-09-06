@@ -171,6 +171,7 @@
     }
   },
   "announcement": {
+    "clearDateTime": "清除",
     "colors": {
       "green": "绿色",
       "red": "红色",
@@ -178,14 +179,19 @@
       "yellow": "黄色"
     },
     "content": "公告内容",
+    "dateTimePlaceholder": "选择日期和时间",
     "description": "公告在指定时间段内与导航栏共同置顶；到期自动隐藏，保留内容和时间供下次编辑。",
     "disableNow": "立即关闭",
     "enabled": "开启公告",
     "endsAt": "结束时间",
+    "hour": "小时",
     "manage": "公告管理",
     "markdownHelp": "支持 Markdown 标题、列表、链接和表格；禁用 HTML 和图片。",
+    "minute": "分钟",
+    "nextMonth": "下个月",
     "preview": "发布前预览",
     "previewEmpty": "输入内容后在此预览",
+    "previousMonth": "上个月",
     "save": "保存公告",
     "saved": "保存成功，访客页面将在 30 秒内同步。",
     "saveFailed": "保存失败，公告未发布。请检查网络或登录状态后重试。",
@@ -201,7 +207,9 @@
     "statusLabel": "已发布状态",
     "textColor": "公告文字颜色",
     "timezone": "时间按 {{timezone}} 输入，访客在同一时刻看到公告。",
+    "timezoneSelect": "时区",
     "title": "公告",
+    "today": "今天",
     "validation": "请填写公告内容及有效的开始、结束时间；结束时间必须晚于开始时间和当前时间。"
   },
   "chart": {

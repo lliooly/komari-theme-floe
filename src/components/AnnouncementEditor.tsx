@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Megaphone, Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAnnouncement } from "@/contexts/AnnouncementContext";
 import {
@@ -17,6 +17,7 @@ import {
   type Announcement,
   type AnnouncementTextColor,
 } from "@/lib/announcement";
+import { getSystemTimeZone, localDateTimeToTimestamp } from "@/lib/dateTime";
 import { updateThemeSettings } from "@/lib/themeSettings";
 import { cn } from "@/lib/utils";
 import AnnouncementMarkdown from "./AnnouncementMarkdown";
@@ -42,12 +43,17 @@ function EditorForm() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [timezone, setTimezone] = useState("UTC");
+
+  useEffect(() => {
+    setTimezone(getSystemTimeZone());
+  }, []);
+
   const save = async (disable = false) => {
     setError("");
     setMessage("");
-    const starts = new Date(start).getTime();
-    const ends = new Date(end).getTime();
+    const starts = localDateTimeToTimestamp(start, timezone);
+    const ends = localDateTimeToTimestamp(end, timezone);
     if (!disable && enabled && (!content.trim() || !Number.isFinite(starts) || !Number.isFinite(ends) || ends <= starts || ends <= Date.now())) {
       setError(t("announcement.validation"));
       return;
@@ -85,8 +91,28 @@ function EditorForm() {
       </div>
       <p className="text-sm text-muted-foreground">{t("announcement.timezone", { timezone })}</p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="min-w-0 space-y-2"><label htmlFor="announcement-start">{t("announcement.startsAt")}</label><Input id="announcement-start" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} /></div>
-        <div className="min-w-0 space-y-2"><label htmlFor="announcement-end">{t("announcement.endsAt")}</label><Input id="announcement-end" type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} /></div>
+        <div className="min-w-0 space-y-2">
+          <label htmlFor="announcement-start">{t("announcement.startsAt")}</label>
+          <DateTimePicker
+            id="announcement-start"
+            value={start}
+            timeZone={timezone}
+            placeholder={t("announcement.dateTimePlaceholder")}
+            onChange={setStart}
+            onTimeZoneChange={setTimezone}
+          />
+        </div>
+        <div className="min-w-0 space-y-2">
+          <label htmlFor="announcement-end">{t("announcement.endsAt")}</label>
+          <DateTimePicker
+            id="announcement-end"
+            value={end}
+            timeZone={timezone}
+            placeholder={t("announcement.dateTimePlaceholder")}
+            onChange={setEnd}
+            onTimeZoneChange={setTimezone}
+          />
+        </div>
       </div>
       <div className="space-y-2">
         <span className="block">{t("announcement.textColor")}</span>
