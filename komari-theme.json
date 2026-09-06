@@ -2,18 +2,18 @@
   "name": "Floe",
   "short": "floe",
   "description": "A fluid Komari theme built around live data, soft layers and responsive feedback.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "豕豕豕",
   "url": "https://github.com/lliooly/komari-theme-floe",
   "preview": "preview.png",
   "configuration": {
-    "type": "redirect",
+    "type": "raw",
     "name": {
       "zh-CN": "Floe 主题设置",
       "zh-TW": "Floe 主題設定",
       "en-US": "Floe Theme Settings"
     },
     "icon": "Palette",
-    "data": "settings"
+    "data": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Floe Theme Settings</title><style>html,body{margin:0;min-height:100%;background:transparent;font:14px system-ui,sans-serif;color:#6b7280}body{display:grid;place-items:center}a{color:inherit}</style></head><body><p>Loading Floe theme settings… <a id=\"settings-link\" href=\"/settings?embedded=1\">Open settings</a></p><script>(function(){var parentUrl=null;try{parentUrl=new URL(window.parent.location.href)}catch(e){}if(!parentUrl){try{parentUrl=new URL(document.referrer)}catch(e){}}var origin=parentUrl&&parentUrl.origin!==\"null\"?parentUrl.origin:(window.location.origin===\"null\"?\"\":window.location.origin);var adminIndex=parentUrl?parentUrl.pathname.indexOf(\"/admin\"):-1;var basePath=adminIndex>=0?parentUrl.pathname.slice(0,adminIndex).replace(/\\/+$/,\"\"): \"\";var target=(origin||\"\")+basePath+\"/settings?embedded=1\";document.getElementById(\"settings-link\").href=target;window.location.replace(target)})()</script></body></html>"
   }
 }

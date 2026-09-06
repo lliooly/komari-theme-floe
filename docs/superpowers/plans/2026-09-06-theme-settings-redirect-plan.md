@@ -2,6 +2,8 @@
 
 ## 目标
 
+> 历史计划：`v0.1.1` 曾将入口切换为 `redirect`。当前实现已改为 `raw` 内嵌方案，详见 `2026-09-06-theme-settings-raw-embed-plan.md`。
+
 将 Floe 的 Komari 后台主题入口从自动生成的 `managed` 表单切换为 `redirect`，让后台进入 Floe 自己的 `/settings` 页面，并在公告设置中使用日期时间选择器。
 
 ## 实施步骤
