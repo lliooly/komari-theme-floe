@@ -46,6 +46,147 @@
   transition: transform 200ms ease-out;
 }
 
+.dashboard-status-icon {
+  position: relative;
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  color: var(--muted-foreground);
+  isolation: isolate;
+}
+
+.dashboard-status-icon__glyph {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  transform-origin: center;
+  transition: color 180ms ease-out, filter 180ms ease-out;
+}
+
+.dashboard-status-icon__glyph > svg {
+  display: block;
+}
+
+.dashboard-status-icon:hover,
+.dashboard-status-icon:focus-visible {
+  color: var(--primary);
+}
+
+.dashboard-status-icon:hover .dashboard-status-icon__glyph,
+.dashboard-status-icon:focus-visible .dashboard-status-icon__glyph {
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--primary) 28%, transparent));
+}
+
+.dashboard-status-icon--time:hover .dashboard-status-icon__glyph,
+.dashboard-status-icon--time:focus-visible .dashboard-status-icon__glyph {
+  animation: dashboard-status-clock-tick 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-status-icon--online::after,
+.dashboard-status-icon--region::after {
+  position: absolute;
+  inset: -0.2rem;
+  z-index: 0;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dashboard-status-icon--online:hover::after,
+.dashboard-status-icon--online:focus-visible::after {
+  animation: dashboard-status-online-pulse 520ms ease-out both;
+}
+
+.dashboard-status-icon--online:hover .dashboard-status-icon__glyph,
+.dashboard-status-icon--online:focus-visible .dashboard-status-icon__glyph {
+  animation: dashboard-status-online-lift 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-status-icon--region::after {
+  inset: auto 0.1rem -0.25rem;
+  height: 0.35rem;
+  border-width: 1px 0 0;
+  border-radius: 50%;
+}
+
+.dashboard-status-icon--region:hover::after,
+.dashboard-status-icon--region:focus-visible::after {
+  animation: dashboard-status-region-pulse 520ms ease-out both;
+}
+
+.dashboard-status-icon--region:hover .dashboard-status-icon__glyph,
+.dashboard-status-icon--region:focus-visible .dashboard-status-icon__glyph {
+  animation: dashboard-status-region-lift 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-status-icon--traffic:hover .dashboard-status-icon__glyph,
+.dashboard-status-icon--traffic:focus-visible .dashboard-status-icon__glyph {
+  animation: dashboard-status-traffic-flow 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-status-icon__trails {
+  position: absolute;
+  top: 50%;
+  left: -0.45rem;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.dashboard-status-icon__trails span {
+  display: block;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+  transform-origin: left center;
+}
+
+.dashboard-status-icon__trails span:nth-child(1) {
+  width: 0.28rem;
+}
+
+.dashboard-status-icon__trails span:nth-child(2) {
+  width: 0.44rem;
+}
+
+.dashboard-status-icon__trails span:nth-child(3) {
+  width: 0.34rem;
+}
+
+.dashboard-status-icon--speed:hover .dashboard-status-icon__glyph,
+.dashboard-status-icon--speed:focus-visible .dashboard-status-icon__glyph {
+  animation: dashboard-status-speed-bolt 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-status-icon--speed:hover .dashboard-status-icon__trails span,
+.dashboard-status-icon--speed:focus-visible .dashboard-status-icon__trails span {
+  animation: dashboard-status-speed-trail 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-status-icon--speed:hover .dashboard-status-icon__trails span:nth-child(1),
+.dashboard-status-icon--speed:focus-visible .dashboard-status-icon__trails span:nth-child(1) {
+  animation-delay: 30ms;
+}
+
+.dashboard-status-icon--speed:hover .dashboard-status-icon__trails span:nth-child(2),
+.dashboard-status-icon--speed:focus-visible .dashboard-status-icon__trails span:nth-child(2) {
+  animation-delay: 75ms;
+}
+
+.dashboard-status-icon--speed:hover .dashboard-status-icon__trails span:nth-child(3),
+.dashboard-status-icon--speed:focus-visible .dashboard-status-icon__trails span:nth-child(3) {
+  animation-delay: 120ms;
+}
+
 .telemetry-value {
   display: inline-block;
   font-variant-numeric: tabular-nums;
@@ -129,6 +270,118 @@
   }
 }
 
+@keyframes dashboard-status-clock-tick {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  35% {
+    transform: rotate(9deg) scale(1.08);
+  }
+  65% {
+    transform: rotate(-4deg) scale(1.02);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes dashboard-status-online-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  35% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes dashboard-status-online-lift {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(-1px) scale(1.08);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dashboard-status-region-pulse {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.35);
+  }
+  35% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.45);
+  }
+}
+
+@keyframes dashboard-status-region-lift {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(-2px) scale(1.08);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dashboard-status-traffic-flow {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-1px) scale(1.07);
+  }
+  65% {
+    transform: translateY(1px) scale(1.04);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dashboard-status-speed-bolt {
+  0% {
+    transform: translateX(0) scale(1) rotate(0deg);
+  }
+  35% {
+    transform: translateX(1px) scale(1.13) rotate(-6deg);
+  }
+  70% {
+    transform: translateX(0) scale(1.04) rotate(2deg);
+  }
+  100% {
+    transform: translateX(0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes dashboard-status-speed-trail {
+  0% {
+    opacity: 0;
+    transform: translateX(-5px) scaleX(0.35);
+  }
+  35% {
+    opacity: 0.9;
+    transform: translateX(0) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(4px) scaleX(0.65);
+  }
+}
+
 @keyframes telemetry-value-change {
   from {
     opacity: 0.55;
@@ -190,6 +443,13 @@
 
   .semantic-icon-chevron {
     transition: none;
+  }
+
+  .dashboard-status-icon__glyph,
+  .dashboard-status-icon::after,
+  .dashboard-status-icon__trails span {
+    animation: none !important;
+    transition: none !important;
   }
 
   .telemetry-value__content,

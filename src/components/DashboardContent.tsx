@@ -2,7 +2,13 @@
 
 import React, { Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, Globe, Activity, ArrowUpRight, Zap } from "@/components/Icones/Reicon";
+import {
+  ArrowUpDown,
+  Clock,
+  Flash,
+  MapPoint,
+  Users,
+} from "@/components/Icones/Reicon";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -120,6 +126,37 @@ const renderSpeedStatusValue = ({
   />
 );
 
+type DashboardStatusIconKind =
+  | "time"
+  | "online"
+  | "region"
+  | "traffic"
+  | "speed";
+
+function DashboardStatusIcon({
+  kind,
+  children,
+}: {
+  kind: DashboardStatusIconKind;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={`dashboard-status-icon dashboard-status-icon--${kind}`}
+      aria-hidden="true"
+    >
+      <span className="dashboard-status-icon__glyph">{children}</span>
+      {kind === "speed" && (
+        <span className="dashboard-status-icon__trails" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </span>
+      )}
+    </span>
+  );
+}
+
 export default function DashboardContent() {
   const mounted = useMounted();
   const [t] = useTranslation();
@@ -194,14 +231,22 @@ export default function DashboardContent() {
     {
       key: "currentTime",
       title: t("current_time"),
-      icon: <Clock className="h-4 w-4 text-muted-foreground" />,
+      icon: (
+        <DashboardStatusIcon kind="time">
+          <Clock className="h-4 w-4" />
+        </DashboardStatusIcon>
+      ),
       renderValue: () => <CurrentTimeCard />,
       visible: statusCardsVisibility.currentTime,
     },
     {
       key: "currentOnline",
       title: t("current_online"),
-      icon: <Activity className="h-4 w-4 text-muted-foreground" />,
+      icon: (
+        <DashboardStatusIcon kind="online">
+          <Users className="h-4 w-4" />
+        </DashboardStatusIcon>
+      ),
       renderValue: () => (
         <span className="inline-flex items-baseline gap-0 tabular-nums">
           <AnimatedNumber value={onlineCount} />
@@ -214,14 +259,22 @@ export default function DashboardContent() {
     {
       key: "regionOverview",
       title: t("region_overview"),
-      icon: <Globe className="h-4 w-4 text-muted-foreground" />,
+      icon: (
+        <DashboardStatusIcon kind="region">
+          <MapPoint className="h-4 w-4" />
+        </DashboardStatusIcon>
+      ),
       renderValue: () => <AnimatedNumber value={onlineRegionCount} />,
       visible: statusCardsVisibility.regionOverview,
     },
     {
       key: "trafficOverview",
       title: t("traffic_overview"),
-      icon: <ArrowUpRight className="h-4 w-4 text-muted-foreground" />,
+      icon: (
+        <DashboardStatusIcon kind="traffic">
+          <ArrowUpDown className="h-4 w-4" />
+        </DashboardStatusIcon>
+      ),
       renderValue: () => {
         const data = live_data?.data?.data;
         const online = live_data?.data?.online;
@@ -245,7 +298,11 @@ export default function DashboardContent() {
     {
       key: "networkSpeed",
       title: t("network_speed"),
-      icon: <Zap className="h-4 w-4 text-muted-foreground" />,
+      icon: (
+        <DashboardStatusIcon kind="speed">
+          <Flash className="h-4 w-4" />
+        </DashboardStatusIcon>
+      ),
       structuredValue: themeConfig.statusDesign === "speed",
       renderValue: () => {
         const data = live_data?.data?.data;

@@ -2,7 +2,6 @@
 
 import { type ReactNode } from "react";
 import {
-  Activity,
   CheckCircle2,
   CircleAlert,
   CircleHelp,
@@ -10,6 +9,7 @@ import {
   Clock3,
   ExternalLink,
   RefreshCw,
+  Server,
   Wrench,
 } from "@/components/Icones/Reicon";
 import type { ReiconIcon } from "@/components/Icones/Reicon";
@@ -295,7 +295,7 @@ function LoadingCard({
     <Card {...getRevealProps(revealDelay, revealReady)} data-card-blur-surface="true" aria-busy="true">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Activity className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Server className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           {title}
         </CardTitle>
       </CardHeader>
@@ -418,7 +418,7 @@ export default function UptimeKumaStatus({
       <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Activity className="h-4 w-4 text-primary" aria-hidden="true" />
+            <Server className="h-4 w-4 text-primary" aria-hidden="true" />
             {t("uptimeKuma.title", { defaultValue: "Service status" })}
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendingUp, ArrowUp, ArrowDown, Activity, Upload, Download } from "@/components/Icones/Reicon";
+import { TrendingUp, ArrowUp, ArrowDown, Gauge, Upload, Download } from "@/components/Icones/Reicon";
 import type { TFunction } from "i18next";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
@@ -653,7 +653,7 @@ const Node = ({
         }`}>
           <div className="flex justify-between items-center">
              <span className="text-muted-foreground flex items-center gap-1">
-               <Activity className="h-3 w-3" /> {t("nodeCard.networkSpeed")}
+               <Gauge className="h-3 w-3" /> {t("nodeCard.networkSpeed")}
              </span>
              <div className="flex gap-3 font-mono text-xs">
                 <span className="flex items-center text-green-600 dark:text-green-400">
