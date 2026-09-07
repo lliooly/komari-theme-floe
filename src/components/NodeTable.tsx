@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Flex } from "@/components/ui/flex";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { ArrowUpDown, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowUpDown, ChevronRight, ChevronUp, ChevronDown } from "@/components/Icones/Reicon";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { LiveData, Record } from "../types/LiveData";
 import {

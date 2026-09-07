@@ -12,11 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Box } from "@/components/ui/box";
 import { useTranslation } from "react-i18next";
-import { TablerSettings } from "./Icones/Tabler";
+import { Settings } from "./Icones/Reicon";
 import { AccountProvider, useAccount } from "@/contexts/AccountContext";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
 import { useMounted } from "@/hooks/useMounted";
-import { LogIn } from "lucide-react";
+import { LogIn } from "@/components/Icones/Reicon";
 import { ActionFeedbackIcon } from "@/components/ui/action-feedback-icon";
 import { useActionFeedback } from "@/hooks/useActionFeedback";
 
@@ -189,7 +189,7 @@ const LoginDialogContent = ({
     return (
       <a href="/admin" target="_blank">
         <Button variant="ghost" size="icon">
-          <TablerSettings />
+          <Settings />
         </Button>
       </a>
     );

@@ -4,7 +4,7 @@ import { type Row, flexRender } from "@tanstack/react-table";
 import { z } from "zod";
 import { schema } from "@/components/admin/NodeTable/schema/node";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { GripVertical } from "lucide-react";
+import { GripVertical } from "@/components/Icones/Reicon";
 import { Button } from "@/components/ui/button";
 
 export function DragHandle({ id }: { id: string }) {

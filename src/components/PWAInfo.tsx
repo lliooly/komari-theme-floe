@@ -1,5 +1,5 @@
 // import { usePWA } from '../hooks/usePWA';
-// import { Smartphone, Wifi, Download, RefreshCw } from 'lucide-react';
+// import { Smartphone, Wifi, Download, RefreshCw } from '@/components/Icones/Reicon';
 // import { useTranslation } from 'react-i18next';
 
 export const PWAInfo = () => {

@@ -10,7 +10,7 @@ import {
   Server,
   Sun,
   X,
-} from "lucide-react";
+} from "@/components/Icones/Reicon";
 import { useTranslation } from "react-i18next";
 import {
   type Appearance,

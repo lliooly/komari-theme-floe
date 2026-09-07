@@ -1,6 +1,6 @@
 // import { useState, useEffect } from 'react';
 // import { Button } from './ui/button';
-// import { Download, X } from 'lucide-react';
+// import { Download, X } from '@/components/Icones/Reicon';
 // import { toast } from 'sonner';
 // import { useIsMobile } from '../hooks/use-mobile';
 

@@ -9,7 +9,12 @@ import {
 } from "@radix-ui/themes";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronDownIcon, Power, Save } from "lucide-react";
+import {
+  ChevronDownIcon,
+  Power,
+  Save,
+  type ReiconIcon,
+} from "@/components/Icones/Reicon";
 import { AnimatePresence, motion } from "framer-motion"; // 引入 Framer Motion
 
 import { ActionFeedbackIcon } from "@/components/ui/action-feedback-icon";
@@ -192,7 +197,7 @@ export function SettingCardButton({
   children?: React.ReactNode;
   onClick?: (buttonElement: HTMLButtonElement) => void | Promise<unknown>;
   autoDisabled?: boolean;
-  feedbackIcon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  feedbackIcon?: ReiconIcon;
 }) {
   const { status, run } = useActionFeedback();
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

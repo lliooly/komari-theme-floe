@@ -48,7 +48,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, Columns2, PlusIcon } from "lucide-react";
+import { ChevronDown, Columns2, PlusIcon } from "@/components/Icones/Reicon";
 
 import type { schema } from "./NodeTable/schema/node";
 import { DataTableRefreshContext } from "./NodeTable/schema/DataTableRefreshContext";

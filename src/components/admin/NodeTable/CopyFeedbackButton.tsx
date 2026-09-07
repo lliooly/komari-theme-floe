@@ -1,7 +1,7 @@
 "use client";
 
 import { IconButton } from "@radix-ui/themes";
-import { Copy } from "lucide-react";
+import { Copy } from "@/components/Icones/Reicon";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 

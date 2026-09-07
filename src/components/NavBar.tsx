@@ -5,7 +5,7 @@ import LoginDialog from "./Login";
 import ThemeSwitcher from "./ThemeSwitcher";
 import DarkModeToggle from "./DarkModeToggle";
 import SpaLink from "./SpaLink";
-import { Calculator } from "lucide-react";
+import { Calculator } from "@/components/Icones/Reicon";
 import { Button } from "@/components/ui/button";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
 import { useTheme } from "@/contexts/ThemeContext";

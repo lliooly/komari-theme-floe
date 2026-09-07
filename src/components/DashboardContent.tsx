@@ -2,7 +2,7 @@
 
 import React, { Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, Globe, Activity, ArrowUpRight, Zap } from "lucide-react";
+import { Clock, Globe, Activity, ArrowUpRight, Zap } from "@/components/Icones/Reicon";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

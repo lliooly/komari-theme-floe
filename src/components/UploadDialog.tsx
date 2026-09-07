@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Flex } from "@/components/ui/flex";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
-import { Upload as UploadIcon, X } from "lucide-react";
+import { Upload as UploadIcon, X } from "@/components/Icones/Reicon";
 import { ActionFeedbackIcon } from "@/components/ui/action-feedback-icon";
 import { useActionFeedback } from "@/hooks/useActionFeedback";
 import type { ActionFeedbackStatus } from "@/hooks/useActionFeedback";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Megaphone } from "lucide-react";
+import { Megaphone } from "@/components/Icones/Reicon";
 import { useTranslation } from "react-i18next";
 import { useAnnouncement } from "@/contexts/AnnouncementContext";
 import { announcementStatus, getAnnouncementTextColorClass } from "@/lib/announcement";

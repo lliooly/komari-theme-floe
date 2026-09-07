@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Bolt,
   Home,
@@ -17,10 +16,11 @@ import {
   Activity,
   Palette,
   Code
-} from "lucide-react";
+} from "@/components/Icones/Reicon";
+import type { ReiconIcon } from "@/components/Icones/Reicon";
 
 // Map icon names defined in menuConfig.json to their components
-export const iconMap: Record<string, React.ComponentType<any>> = {
+export const iconMap: Record<string, ReiconIcon> = {
   Server,
   Bolt,
   Home,

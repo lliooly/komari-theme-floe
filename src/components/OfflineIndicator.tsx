@@ -1,7 +1,7 @@
 import { usePWA } from '../hooks/usePWA';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { WifiOff, Wifi } from 'lucide-react';
+import { WifiOff, Wifi } from '@/components/Icones/Reicon';
 import { useTranslation } from 'react-i18next';
 
 export const OfflineIndicator = () => {

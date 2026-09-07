@@ -5,7 +5,7 @@ import {
   type ClientFormData,
 } from "@/components/admin/NodeTable/schema/node";
 import { DataTableRefreshContext } from "@/components/admin/NodeTable/schema/DataTableRefreshContext";
-import { Pencil, Save } from "lucide-react";
+import { Pencil, Save } from "@/components/Icones/Reicon";
 import { t } from "i18next";
 import { toast } from "sonner";
 import { Button, Dialog, Flex, IconButton, TextField } from "@radix-ui/themes";

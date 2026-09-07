@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
 import { geoGraticule10, geoNaturalEarth1, geoPath } from "d3-geo";
-import { MapPinned } from "lucide-react";
+import { MapPinned } from "@/components/Icones/Reicon";
 import { feature } from "topojson-client";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";

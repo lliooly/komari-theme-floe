@@ -14,7 +14,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { cutPeakValues, interpolateNullsLinear } from "@/utils/RecordHelper";
 import Tips from "@/components/ui/tips";
-import { Eye, EyeOff, MoreHorizontal } from "lucide-react";
+import { Eye, EyeOff, MoreHorizontal } from "@/components/Icones/Reicon";
 import { useRPC2Call } from "@/contexts/RPC2Context";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";

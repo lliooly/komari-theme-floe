@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Flex, TextField, TextArea } from "@radix-ui/themes";
-import { Save } from "lucide-react";
+import { Save } from "@/components/Icones/Reicon";
 import { useTranslation } from "react-i18next";
 import { SettingCardCollapse } from "./SettingCard";
 import { ActionFeedbackIcon } from "@/components/ui/action-feedback-icon";

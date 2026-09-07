@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "@/components/Icones/Reicon";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLiveData } from "@/contexts/LiveDataContext";

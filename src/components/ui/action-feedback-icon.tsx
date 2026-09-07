@@ -1,12 +1,17 @@
-import * as React from "react";
-import { Check, LoaderCircle, X } from "lucide-react";
+import {
+  Check,
+  LoaderCircle,
+  X,
+  type ReiconIcon,
+  type ReiconIconProps,
+} from "@/components/Icones/Reicon";
 
 import { cn } from "@/lib/utils";
 import type { ActionFeedbackStatus } from "@/hooks/useActionFeedback";
 
-type FeedbackIcon = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+type FeedbackIcon = ReiconIcon;
 
-interface ActionFeedbackIconProps extends React.SVGProps<SVGSVGElement> {
+interface ActionFeedbackIconProps extends ReiconIconProps {
   status: ActionFeedbackStatus;
   icon: FeedbackIcon;
   successIcon?: FeedbackIcon;

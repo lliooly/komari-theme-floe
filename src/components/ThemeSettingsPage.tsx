@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, LockKeyhole, Palette } from "lucide-react";
+import { ArrowLeft, LockKeyhole, Palette } from "@/components/Icones/Reicon";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/ThemeContext";
 import SpaLink from "@/components/SpaLink";

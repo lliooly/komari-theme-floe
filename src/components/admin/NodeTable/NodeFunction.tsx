@@ -2,7 +2,7 @@ import * as React from "react";
 import { z } from "zod";
 import { schema } from "@/components/admin/NodeTable/schema/node";
 import { DataTableRefreshContext } from "@/components/admin/NodeTable/schema/DataTableRefreshContext";
-import { Terminal, Trash2, Copy, Download, DollarSign } from "lucide-react";
+import { Terminal, Trash2, Copy, Download, DollarSign } from "@/components/Icones/Reicon";
 import { t } from "i18next";
 import type { Row } from "@tanstack/react-table";
 import { EditDialog } from "./NodeEditDialog";

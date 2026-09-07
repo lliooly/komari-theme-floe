@@ -1,4 +1,4 @@
-import { Github, Heart } from "lucide-react";
+import { Github, Heart } from "@/components/Icones/Reicon";
 
 const Footer = () => {
   return (
@@ -23,6 +23,7 @@ const Footer = () => {
             <span>Made with</span>
             <Heart
               className="h-3 w-3 fill-current text-red-500"
+              weight="Filled"
               aria-hidden="true"
             />
             <span>for Komari</span>

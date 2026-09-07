@@ -11,8 +11,8 @@ import {
   ExternalLink,
   RefreshCw,
   Wrench,
-  type LucideIcon,
-} from "lucide-react";
+} from "@/components/Icones/Reicon";
+import type { ReiconIcon } from "@/components/Icones/Reicon";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
@@ -44,7 +44,7 @@ interface UptimeKumaStatusProps {
 
 type StatusMeta = {
   color: BadgeColor;
-  icon: LucideIcon;
+  icon: ReiconIcon;
   translationKey: string;
 };
 

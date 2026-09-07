@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TrendingUp, ArrowUp, ArrowDown, Activity, Upload, Download } from "lucide-react";
+import { TrendingUp, ArrowUp, ArrowDown, Activity, Upload, Download } from "@/components/Icones/Reicon";
 import type { TFunction } from "i18next";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 

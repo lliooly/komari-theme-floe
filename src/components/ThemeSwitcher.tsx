@@ -21,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Activity, Check, Gauge, Palette, Layout, PieChart, Image, Settings, Grid3X3, Table2, X } from 'lucide-react';
+import { Activity, Check, Gauge, Palette, Layout, PieChart, Image, Settings, Grid3X3, Table2, X } from '@/components/Icones/Reicon';
 import { useTranslation } from 'react-i18next';
 import {
   type StatusCardsVisibility,

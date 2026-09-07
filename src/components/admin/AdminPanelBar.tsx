@@ -1,4 +1,3 @@
-import { Cross1Icon } from "@radix-ui/react-icons";
 import { Button, Callout, Flex, Grid, IconButton, Text } from "@radix-ui/themes";
 import { AnimatePresence, motion } from "framer-motion"; // 引入 Framer Motion
 import { useEffect, useState, type ReactNode } from "react";
@@ -9,13 +8,17 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import menuConfig from "../../config/menuConfig.json";
 import type { MenuItem } from "../../types/menu";
 import { iconMap } from "../../utils/iconHelper";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import { TablerMenu2 } from "../Icones/Tabler";
+import {
+  ChevronDown,
+  CircleArrowUp,
+  Logout,
+  Menu4,
+  Xmark,
+} from "../Icones/Reicon";
 import LoginDialog from "../Login";
 import { useAccount } from "@/contexts/AccountContext";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
 import Tips from "../ui/tips";
-import { CircleFadingArrowUp, LogOut } from "lucide-react";
 import { useRPC2Call } from "@/contexts/RPC2Context";
 import { ActionFeedbackIcon } from "@/components/ui/action-feedback-icon";
 import { useActionFeedback } from "@/hooks/useActionFeedback";
@@ -306,7 +309,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
                   color: "var(--gray-11)",
                 }}
               >
-                <TablerMenu2 />
+                <Menu4 />
               </IconButton>
               <a href="/" target="_blank" rel="noopener noreferrer">
                 <label className="text-xl font-bold">{publicInfo?.sitename || "Monitor"}</label>
@@ -316,7 +319,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
                   mode="dialog"
                   className="check-update"
                   trigger={
-                    <CircleFadingArrowUp color="#FB4141" size="16" />
+                    <CircleArrowUp color="#FB4141" size="16" />
                   }
                 >
                   <div className="flex flex-col gap-2 max-w-[80vw] md:max-w-[720px]">
@@ -392,7 +395,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
                 disabled={logoutStatus === "loading"}
                 onClick={logout}
               >
-                <ActionFeedbackIcon status={logoutStatus} icon={LogOut} />
+                <ActionFeedbackIcon status={logoutStatus} icon={Logout} />
               </IconButton>
             </Flex>
           </Flex>
@@ -431,7 +434,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
                 }}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Cross1Icon className="semantic-icon-transition" />
+                <Xmark className="semantic-icon-transition" />
               </IconButton>
               {/* 侧边连链接 */}
               <Flex
@@ -546,7 +549,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
                             {item.rawLabel || t(item.labelKey)}
                           </Text>
 
-                          <ChevronDownIcon
+                          <ChevronDown
                             className="semantic-icon-chevron"
                             style={{
                               transform: isOpen
