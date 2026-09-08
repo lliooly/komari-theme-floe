@@ -2,10 +2,11 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { type Row, flexRender } from "@tanstack/react-table";
 import { z } from "zod";
-import { schema } from "@/components/admin/NodeTable/schema/node";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { GripVertical } from "@/components/Icones/Reicon";
 import { Button } from "@/components/ui/button";
+import type { schema } from "./schema/node";
+import type { NodeTableFeatures } from "./schema/tableFeatures";
 
 export function DragHandle({ id }: { id: string }) {
   const { attributes, listeners } = useSortable({
@@ -25,7 +26,11 @@ export function DragHandle({ id }: { id: string }) {
   );
 }
 
-export function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+export function DraggableRow({
+  row,
+}: {
+  row: Row<NodeTableFeatures, z.infer<typeof schema>>;
+}) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.uuid,
   });

@@ -17,17 +17,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
-  type ColumnDef,
+  type ColumnVisibilityState,
   type ColumnFiltersState,
+  type RowSelectionState,
   type SortingState,
-  type VisibilityState,
+  createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table";
 import { z } from "zod";
 
@@ -51,6 +47,7 @@ import {
 import { ChevronDown, Columns2, PlusIcon } from "@/components/Icones/Reicon";
 
 import type { schema } from "./NodeTable/schema/node";
+import { nodeTableFeatures } from "./NodeTable/schema/tableFeatures";
 import { DataTableRefreshContext } from "./NodeTable/schema/DataTableRefreshContext";
 import { t } from "i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -62,21 +59,25 @@ import { ActionFeedbackIcon } from "@/components/ui/action-feedback-icon";
 import { Dialog, Flex, Button, Checkbox, TextField } from "@radix-ui/themes";
 import Loading from "../loading";
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
-  {
+type Node = z.infer<typeof schema>;
+const columnHelper = createColumnHelper<typeof nodeTableFeatures, Node>();
+
+const columns = columnHelper.columns([
+  columnHelper.display({
     id: "drag",
     header: () => null,
     cell: ({ row }) => <DragHandle id={row.original.uuid} />,
-  },
-  {
+  }),
+  columnHelper.display({
     id: "select",
     header: ({ table }) => (
       <div className="flex items-center justify-center">
         <Checkbox
           size={"1"}
           checked={
-            table.getIsAllRowsSelected() ||
-            (table.getIsSomeRowsSelected() && "indeterminate")
+            table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+              ? "indeterminate"
+              : table.getIsAllRowsSelected()
           }
           onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
         />
@@ -93,17 +94,15 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
-  },
-  {
-    accessorKey: "name",
+  }),
+  columnHelper.accessor("name", {
     header: t("admin.nodeTable.name"),
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />;
     },
     enableHiding: false,
-  },
-  {
-    accessorKey: "ipv4",
+  }),
+  columnHelper.accessor("ipv4", {
     header: t("admin.nodeTable.ipAddress"),
     cell: ({ row }) => {
       const ipv4 = row.original.ipv4;
@@ -125,26 +124,26 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         </div>
       );
     },
-  },
-  {
-    accessorKey: "version",
+  }),
+  columnHelper.accessor("version", {
     header: t("admin.nodeTable.clientVersion"),
     cell: ({ row }) => <div className="w-32">{row.getValue("version")}</div>,
-  },
-  {
+  }),
+  columnHelper.display({
     id: "actions",
     cell: ({ row }) => <ActionsCell row={row} />,
-  },
-];
+  }),
+]);
 
 export function DataTable() {
   const [data, setData] = React.useState<z.infer<typeof schema>[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] =
+    React.useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+    React.useState<ColumnVisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -207,7 +206,8 @@ export function DataTable() {
       });
   }, [data.length]);
 
-  const table = useReactTable({
+  const table = useTable({
+    features: nodeTableFeatures,
     data,
     columns,
     state: {
@@ -222,11 +222,6 @@ export function DataTable() {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
   });
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
