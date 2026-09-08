@@ -943,7 +943,7 @@ export const NodeGrid = ({
     resizeObserver.observe(grid);
 
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [NODE_GRID_MIN_COL]);
 
   const onlineNodes = React.useMemo(() => liveData?.online ?? [], [liveData?.online]);
 
@@ -978,17 +978,18 @@ export const NodeGrid = ({
     const grid = gridRef.current;
     if (!grid) return;
 
+    const activeRows = activeRowItemsRef.current;
     const gridItems = Array.from(
       grid.querySelectorAll<HTMLElement>("[data-node-grid-item='true']")
     );
 
     if (typeof IntersectionObserver === "undefined") {
       const firstRowUuids = rowUuidsByIndex[0] || [];
-      activeRowItemsRef.current.set(0, new Set(firstRowUuids));
+      activeRows.set(0, new Set(firstRowUuids));
       enqueuePingStatsRow(0, firstRowUuids);
 
       return () => {
-        activeRowItemsRef.current.delete(0);
+        activeRows.delete(0);
         deactivatePingStatsRow(0);
       };
     }
@@ -1015,10 +1016,10 @@ export const NodeGrid = ({
 
     return () => {
       observer.disconnect();
-      activeRowItemsRef.current.forEach((_rowItems, rowIndex) => {
+      activeRows.forEach((_rowItems, rowIndex) => {
         deactivatePingStatsRow(rowIndex);
       });
-      activeRowItemsRef.current.clear();
+      activeRows.clear();
     };
   }, [deactivatePingStatsRow, enqueuePingStatsRow, markPingStatsRowItem, rowUuidsByIndex]);
 

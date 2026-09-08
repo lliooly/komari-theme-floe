@@ -1,4 +1,5 @@
 import React from "react";
+import { fetchJson, withRequestTimeout } from "./request";
 import { toast } from "sonner";
 
 /**
@@ -42,16 +43,11 @@ function normalizeSettingsPayload(
  */
 export async function getSettings(): Promise<SettingsResponse> {
   try {
-    const response = await fetch("/api/admin/settings");
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    // Remove database metadata fields that are not needed for UI
-    const { CreatedAt, UpdatedAt, id, ...settings } = data["data"];
+    const data = await fetchJson<{ data: SettingsResponse }>("/api/admin/settings");
+    const settings: Partial<SettingsResponse> = { ...data.data };
+    delete settings.CreatedAt;
+    delete settings.UpdatedAt;
+    delete settings.id;
 
     return normalizeSettingsPayload(settings) as SettingsResponse;
   } catch (error) {
@@ -68,31 +64,20 @@ export async function getSettings(): Promise<SettingsResponse> {
 export async function updateSettings(
   settings: Partial<SettingsResponse>
 ): Promise<void> {
-  try {
-    const normalizedSettings = normalizeSettingsPayload(settings);
+  await withRequestTimeout(async (signal) => {
     const response = await fetch("/api/admin/settings", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(normalizedSettings),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(normalizeSettingsPayload(settings)),
+      signal,
     });
-
     if (!response.ok) {
-      try {
-        const errorData = await response.json();
-        console.log("Error response data:", errorData.message);
-        throw new Error(
-          `${errorData['message']}`
-        );
-      } catch (jsonError) {
-        throw jsonError
-      }
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `HTTP ${response.status}: ${response.statusText}`);
     }
-  } catch (error) {
-    throw error;
-  }
+  });
 }
+
 export async function updateSettingsWithToast(
   settings: Partial<SettingsResponse>,
   t: (key: string) => string
@@ -115,11 +100,9 @@ export async function updateSettingsWithToast(
  */
 export async function updateSingleSetting<K extends keyof SettingsResponse>(
   key: K,
-  value: SettingsResponse[K],
-  currentSettings: SettingsResponse
+  value: SettingsResponse[K]
 ): Promise<void> {
   const updatedSettings = normalizeSettingsPayload({
-    ...currentSettings,
     [key]: value,
   });
   return updateSettings(updatedSettings);
@@ -176,7 +159,7 @@ export function useSettings() {
           ? (normalizeSiteDescription(value) as SettingsResponse[K])
           : value;
 
-      await updateSingleSetting(key, normalizedValue, settings);
+      await updateSingleSetting(key, normalizedValue);
       setSettings((prev) => ({ ...prev, [key]: normalizedValue }));
     } catch (err) {
       setError(
@@ -195,7 +178,7 @@ export function useSettings() {
         ...settings,
         ...newSettings,
       }) as SettingsResponse;
-      await updateSettings(updatedSettings);
+      await updateSettings(normalizeSettingsPayload(newSettings));
       setSettings(updatedSettings);
     } catch (err) {
       setError(

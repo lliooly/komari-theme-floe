@@ -76,6 +76,7 @@ export function useActionFeedback(resetDelayMs = DEFAULT_RESET_DELAY_MS) {
   );
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
       runIdRef.current += 1;

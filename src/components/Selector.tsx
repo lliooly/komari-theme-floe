@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Search } from "@/components/Icones/Reicon";
@@ -82,14 +82,6 @@ function SelectorInner<T>(props: SelectorProps<T>) {
   // 孤立（value 中但 items 不再存在）
   const orphanIds = value.filter((id) => !items.some((it) => getId(it) === id));
 
-  const checkAllRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (checkAllRef.current) {
-      // @ts-ignore - set indeterminate
-      checkAllRef.current.indeterminate = isIndeterminate;
-    }
-  }, [isIndeterminate]);
-
   const handleCheckAll = (checked: boolean) => {
     if (checked) {
       onChange(Array.from(new Set([...value, ...allIds])));
@@ -124,8 +116,7 @@ function SelectorInner<T>(props: SelectorProps<T>) {
           <TableHeader>
             <TableHead>
               <Checkbox
-                ref={checkAllRef}
-                checked={allChecked}
+                checked={isIndeterminate ? "indeterminate" : allChecked}
                 onCheckedChange={(checked) => handleCheckAll(!!checked)}
                 aria-label="Select all"
               />

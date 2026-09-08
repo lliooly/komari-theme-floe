@@ -38,7 +38,7 @@ const StatCard = ({
   </Card>
 );
 
-export const DetailsGrid = ({ uuid, gap, box, align }: DetailsGridProps) => {
+export const DetailsGrid = ({ uuid, gap }: DetailsGridProps) => {
   const { t } = useTranslation();
   const { nodeList } = useNodeList();
   const { live_data } = useLiveData();

@@ -11,6 +11,7 @@ import React, {
   ReactNode,
 } from "react";
 import { useTheme as useNextTheme } from "next-themes";
+import { toast } from "sonner";
 import { updateThemeSettings } from "@/lib/themeSettings";
 import type { UptimeKumaSettings } from "@/lib/uptimeKuma";
 import i18n, { detectClientLanguage, normalizeLanguage } from "@/i18n/config";
@@ -909,32 +910,37 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setManagedThemeSettings(normalizeManagedThemeSettings(nextRaw));
     setManagedSettingsSignature(getManagedSettingsSignature(nextRaw));
     clearLocalOverrides();
-    queuedSaveRef.current = nextRaw;
+    queuedSaveRef.current = mergeManagedSettings(queuedSaveRef.current ?? {}, patch);
 
     if (savingRef.current) {
       return;
     }
 
     const run = async () => {
+      if (savingRef.current) return;
       savingRef.current = true;
-      while (queuedSaveRef.current) {
-        const value = queuedSaveRef.current;
-        queuedSaveRef.current = null;
-
-        try {
-          await updateThemeSettings((current) => {
-            // Announcements are managed independently, never overwrite them
-            // with this provider's initial public-settings snapshot.
-            const themeOnly = Object.fromEntries(Object.entries(value).filter(
-              ([key]) => key !== "announcement" && !key.startsWith("announcement.")
-            ));
-            return { ...current, ...themeOnly };
-          });
-        } catch (error) {
-          console.warn("Failed to save theme settings:", error);
+      try {
+        while (queuedSaveRef.current) {
+          const patchToSave = queuedSaveRef.current as ManagedThemeSettings;
+          queuedSaveRef.current = null;
+          try {
+            await updateThemeSettings((current) => mergeManagedSettings(current, patchToSave));
+            toast.dismiss("floe-settings-save-error");
+          } catch (error) {
+            // Preserve failed edits; newer queued edits win when the user retries.
+            queuedSaveRef.current = mergeManagedSettings(patchToSave, queuedSaveRef.current ?? {});
+            toast.error(i18n.t("settings.settings_save_failed"), {
+              id: "floe-settings-save-error",
+              duration: Infinity,
+              description: error instanceof Error ? error.message : String(error),
+              action: { label: i18n.t("common.retry", "Retry"), onClick: () => { void run(); } },
+            });
+            break;
+          }
         }
+      } finally {
+        savingRef.current = false;
       }
-      savingRef.current = false;
     };
 
     void run();

@@ -192,3 +192,17 @@ Floe 使用 MIT License，原有版权和许可证声明保留在 [LICENSE](./LI
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
  </picture>
 </a>
+
+
+## 本地预览与设置并发保存
+
+执行 `npm run build` 后，使用 `npm run preview` 或 `npm start`。预览服务监听
+`http://127.0.0.1:3000`，提供 `dist` 静态文件，并将 `/api`、`/themes`（含 WebSocket）
+代理到 `.env.local` 的 `NEXT_PUBLIC_API_TARGET`，默认 `http://127.0.0.1:25774`。
+可通过 `PORT` 修改端口。
+
+设置请求有超时限制；支持 Web Locks 的浏览器会串行处理同源 Floe 页面和内嵌设置页的保存，
+并仅将本次编辑字段合并到最新服务器配置。主题保存失败时，修改保留在当前页面队列中，
+错误通知提供重试按钮；刷新页面会丢弃未保存修改。不支持 Web Locks 时，仅保证当前页面内串行。
+不同浏览器、设备或其他管理客户端不共享此锁；Komari 1.2.1 设置接口没有版本条件检查，
+要彻底保证这类并发写入的原子性，需要后端支持。请避免在多个设备上同时编辑设置。

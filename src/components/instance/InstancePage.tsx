@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchJson } from "@/lib/request";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useLiveData } from "@/contexts/LiveDataContext";
@@ -11,7 +12,7 @@ import { useNodeList } from "@/contexts/NodeListContext";
 import { liveDataToRecords } from "@/utils/RecordHelper";
 import LoadChart from "./LoadChart";
 import PingChart from "./PingChart";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 
 // Import DetailsGrid as client-only to prevent hydration mismatch with i18n
 const DetailsGrid = dynamic(
@@ -38,10 +39,22 @@ export default function InstancePage({ uuid }: InstancePageProps) {
   useEffect(() => {
     if (!uuid) return;
     
-    fetch(`/api/recent/${uuid}`)
-      .then((res) => res.json())
-      .then((data) => setRecent(data.data.slice(-length)))
-      .catch((err) => console.error("Failed to fetch recent data:", err));
+    const controller = new AbortController();
+    setRecent([]);
+    fetchJson<{ data: Record[] }>(`/api/recent/${encodeURIComponent(uuid)}`, { signal: controller.signal })
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setRecent((live) => {
+          const merged = new Map([...data.data, ...live].map((record) => [record.updated_at, record]));
+          return [...merged.values()]
+            .sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime())
+            .slice(-length);
+        });
+      })
+      .catch((err) => {
+        if (!controller.signal.aborted) console.error("Failed to fetch recent data:", err);
+      });
+    return () => controller.abort();
   }, [uuid, length]);
 
   // Dynamic data updates

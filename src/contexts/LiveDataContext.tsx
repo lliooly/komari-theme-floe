@@ -53,6 +53,7 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         // 策略由 RPC2Client 内部实现
         const result: Record<string, any> = await call("common:getNodesLatestStatus");
+        if (stopped) return;
         // 将返回转换为 LiveDataResponse 结构
         const online = Object.values(result)
           .filter((v: any) => v?.online)
@@ -100,6 +101,7 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setShowCallout(true);
         notifyRefreshCallbacks(live);
       } catch (e) {
+        if (stopped) return;
         console.error("RPC2 获取最新状态失败:", e);
         setShowCallout(false);
       } finally {

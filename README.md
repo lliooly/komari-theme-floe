@@ -193,3 +193,21 @@ Floe is released under the MIT License. The original copyright and license notic
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
  </picture>
 </a>
+
+
+## Local preview and settings concurrency
+
+Run `npm run build`, then `npm run preview` (or `npm start`). The preview listens on
+`http://127.0.0.1:3000`, serves `dist`, and forwards `/api` and `/themes` (including
+WebSockets) to `NEXT_PUBLIC_API_TARGET` in `.env.local`, defaulting to
+`http://127.0.0.1:25774`. Use `PORT` to change the preview port.
+
+Settings writes have request timeouts and use Web Locks, where supported, to
+serialize cooperating Floe tabs and embedded settings on the same origin.
+Only edited fields are merged into the latest server settings. Failed theme
+edits remain queued in the current page and the error notification offers a retry;
+reload discards unsaved edits. Browsers without Web Locks only serialize writes
+within each page. Different browsers/devices and other admin clients cannot share
+this lock: Komari 1.2.1's settings API has no compare-and-swap/version precondition,
+so concurrent writes from those clients still require a backend change for an
+atomic guarantee. Avoid simultaneous editing from multiple devices.

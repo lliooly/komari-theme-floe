@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchJson } from "@/lib/request";
 import { useLiveData } from "@/contexts/LiveDataContext";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
@@ -93,28 +94,26 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   }
 
   useEffect(() => {
-    if (avaliableView.length > 0) {
-      setHoursView(avaliableView[0].value);
-    }
+    setHoursView("real-time");
   }, [max_record_preserve_time]);
 
+  const selectedHours = avaliableView.find((v) => v.value === hoursView)?.hours;
+
   useEffect(() => {
-    const selected = avaliableView.find((v) => v.value === hoursView);
     if (!uuid) return;
-    if (!selected || !selected.hours) {
+    if (!selectedHours) {
       setRemoteData(null);
       setError(null);
       setLoading(false);
       return;
     }
+    const controller = new AbortController();
+    setRemoteData(null);
     setLoading(true);
     setError(null);
-    fetch(`/api/records/load?uuid=${uuid}&hours=${selected.hours}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(res.statusText);
-        return res.json();
-      })
+    fetchJson<any>(`/api/records/load?uuid=${encodeURIComponent(uuid)}&hours=${selectedHours}`, { signal: controller.signal })
       .then((resp) => {
+        if (controller.signal.aborted) return;
         const records = resp.data?.records || [];
         const gpuDevices = resp.data?.gpu_devices || {};
 
@@ -154,10 +153,12 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
         setLoading(false);
       })
       .catch((err) => {
+        if (controller.signal.aborted) return;
         setError(err.message || "Error");
         setLoading(false);
       });
-  }, [hoursView, uuid]);
+    return () => controller.abort();
+  }, [selectedHours, uuid]);
 
   const colors = ["#F38181", "#FCE38A", "#EAFFD0", "#95E1D3"];
   const primaryColor = colors[0];

@@ -85,7 +85,7 @@ function runWithPingRecordRequestLimit<T>(task: () => Promise<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const run = () => {
       activePingRecordRequests++;
-      task()
+      Promise.resolve().then(task)
         .then(resolve, reject)
         .finally(() => {
           activePingRecordRequests = Math.max(0, activePingRecordRequests - 1);

@@ -23,7 +23,7 @@ export const RPC2Provider: React.FC<{ children: React.ReactNode }> = ({ children
   // 创建/复用客户端实例，默认启用自动连接
   const [client] = useState(() => {
     if (!__rpc2_singleton__) {
-      __rpc2_singleton__ = new RPC2Client("/api/rpc2", { autoConnect: true });
+      __rpc2_singleton__ = new RPC2Client("/api/rpc2", { autoConnect: false });
     }
     return __rpc2_singleton__;
   });
@@ -54,6 +54,8 @@ export const RPC2Provider: React.FC<{ children: React.ReactNode }> = ({ children
         console.debug("RPC2 消息:", data);
       },
     });
+
+    void client.connect().catch(() => {});
 
     // 清理函数
     return () => {

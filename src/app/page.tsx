@@ -23,7 +23,7 @@ export default function Page() {
   
   // Handle /instance/<uuid> routes
   if (parts[0] === "instance" && parts[1]) {
-    return <InstancePage uuid={parts[1]} />;
+    return <InstancePage key={parts[1]} uuid={parts[1]} />;
   }
   
   // Default dashboard view
