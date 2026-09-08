@@ -1,0 +1,114 @@
+name: Dependabot auto-merge
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: dependabot-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  auto-merge:
+    if: >-
+      github.repository == 'lliooly/komari-theme-floe' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Read verified Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ github.token }}
+
+      # This privileged workflow must never checkout or execute PR code.
+      - name: Approve and enable auto-merge for patch and minor updates
+        if: >-
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$UPDATE_TYPE" in
+            version-update:semver-patch|version-update:semver-minor) ;;
+            *) exit 0 ;;
+          esac
+          test "$GH_REPO" = 'lliooly/komari-theme-floe'
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          [[ "$EXPECTED_HEAD" =~ ^[0-9a-f]{40}$ ]]
+
+          pr="$(gh pr view "$PR_NUMBER" --json state,isDraft,author,headRefOid,baseRefName,isCrossRepository,reviewDecision,autoMergeRequest)"
+          if ! jq -e --arg sha "$EXPECTED_HEAD" '
+            .state == "OPEN" and .isDraft == false and
+            (.author.login == "app/dependabot" or .author.login == "dependabot[bot]") and
+            .author.is_bot == true and .isCrossRepository == false and
+            .baseRefName == "main" and .headRefOid == $sha
+          ' <<< "$pr" >/dev/null; then
+            echo 'PR changed or is outside the policy; leaving it for review.'
+            exit 0
+          fi
+
+          # reviewDecision may be null when approvals are not required. Inspect
+          # the latest decisive review per person, including dismissed reviews.
+          read_latest_reviews() {
+            local reviews
+            reviews="$(gh api --paginate --slurp "repos/$GH_REPO/pulls/$PR_NUMBER/reviews?per_page=100")" || return
+            jq '[.[][] | select(.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "DISMISSED")]
+              | group_by(.user.id) | map(sort_by(.submitted_at, .id) | last)' <<< "$reviews"
+          }
+          latest="$(read_latest_reviews)"
+          if jq -e '.reviewDecision == "CHANGES_REQUESTED"' <<< "$pr" >/dev/null ||
+            jq -e 'any(.[]; .state == "CHANGES_REQUESTED")' <<< "$latest" >/dev/null; then
+            echo 'A reviewer requested changes; no automatic approval or merge.'
+            exit 0
+          fi
+
+          # gh pr merge --auto can merge immediately if no requirements exist.
+          # Fail closed unless the real GitHub Actions build is required.
+          rules="$(gh api "repos/$GH_REPO/rules/branches/main")"
+          jq -e 'any(.[]; .type == "required_status_checks" and
+            any(.parameters.required_status_checks[]; .context == "build" and .integration_id == 15368))' <<< "$rules" >/dev/null || {
+            echo '::error::main must require the GitHub Actions build check before auto-merge is enabled.'
+            exit 1
+          }
+          if jq -e 'any(.[]; .type == "merge_queue")' <<< "$rules" >/dev/null; then
+            echo '::error::Merge queues are outside this token-based workflow policy.'
+            exit 1
+          fi
+          repository="$(gh api "repos/$GH_REPO")"
+          jq -e '.allow_auto_merge == true and .allow_merge_commit == true' <<< "$repository" >/dev/null || {
+            echo '::error::Enable repository auto-merge and merge commits first.'
+            exit 1
+          }
+
+          # Re-check the head immediately before writing; approval is attached
+          # to the evaluated commit and merge is guarded by that same SHA.
+          current="$(gh pr view "$PR_NUMBER" --json headRefOid,reviewDecision,autoMergeRequest)"
+          test "$(jq -r '.headRefOid' <<< "$current")" = "$EXPECTED_HEAD" || exit 0
+          latest="$(read_latest_reviews)"
+          if jq -e '.reviewDecision == "CHANGES_REQUESTED"' <<< "$current" >/dev/null ||
+            jq -e 'any(.[]; .state == "CHANGES_REQUESTED")' <<< "$latest" >/dev/null; then exit 0; fi
+          if ! jq -e --arg sha "$EXPECTED_HEAD" 'any(.[]; .state == "APPROVED" and .commit_id == $sha)' <<< "$latest" >/dev/null; then
+            gh api --method POST "repos/$GH_REPO/pulls/$PR_NUMBER/reviews" \
+              -f event=APPROVE -f commit_id="$EXPECTED_HEAD" >/dev/null
+          fi
+          if jq -e '.autoMergeRequest == null' <<< "$current" >/dev/null; then
+            gh pr merge "$PR_NUMBER" --auto --merge --match-head-commit "$EXPECTED_HEAD"
+          else
+            echo 'Auto-merge is already enabled.'
+          fi

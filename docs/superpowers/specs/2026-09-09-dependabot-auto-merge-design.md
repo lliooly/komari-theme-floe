@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- 状态：待用户审查，尚未进入实现阶段。
+- 状态：用户已于 2026-09-09 要求实现；实现与验证见配套 CI 实施记录。
 - 日期：2026-09-09。
 - 范围：为 `lliooly/komari-theme-floe` 增加 GitHub Actions 对 Dependabot PR 的自动审批和自动合并策略。
 - 已确认方案：单个 `pull_request_target` workflow。
@@ -75,13 +75,13 @@
 
 ### 步骤顺序
 
-1. 使用 `dependabot/fetch-metadata` 的稳定 v3.1.0 版本读取更新类型。
+1. 使用 `dependabot/fetch-metadata` 稳定 v3.1.0 对应的完整 SHA 读取更新类型，保留默认作者和提交签名验证。
 2. 只在 patch/minor 条件满足时继续。
 3. 读取当前 review 状态：
    - 已经 `APPROVED` 时跳过重复审批；
    - `CHANGES_REQUESTED` 时结束 job，不覆盖人工意见；
-   - 其他状态下使用 `gh pr review --approve` 审批。
-4. 使用 `gh pr merge --auto --merge` 启用自动合并。
+   - 其他状态下通过 `gh api` 提交绑定已核验 `commit_id` 的 APPROVE review，避免审批时 PR 头提交变化。
+4. 确认仓库已启用 Auto-merge、main 要求 GitHub Actions（app 15368）的 `build` 检查且没有 merge queue；重新核对 PR 头提交与人工 review，再使用 `gh pr merge --auto --merge --match-head-commit` 启用自动合并。前提不满足时失败关闭。
 5. 不 checkout 仓库，不安装依赖，不运行 PR 分支脚本，不读取任何自定义 secret。
 
 ### 数据流
@@ -134,7 +134,7 @@ workflow 不使用 `actions/checkout`，不使用 `npm install` 或 `npm run`，
 
 1. Actions 设置允许 GitHub Actions 创建和审批 pull request。
 2. Settings → General → Pull Requests 已启用 Allow auto-merge。
-3. `main` 的分支保护将 `Build and Release Floe Theme / build` 及其他希望强制通过的检查设置为 required。
+3. `main` 的分支保护将 `build` 及其他希望强制通过的检查设置为 required。`Build and Release Floe Theme` 是工作流名称，实际 API 返回的检查 context 是 `build`。
 4. 如果启用了 merge queue，先确认当前 token 是否有权加入队列；否则改用最小权限的 GitHub App 或 PAT。
 
 这些设置不写入仓库文件，因此本次实现只负责提供可审计的 workflow。
@@ -167,3 +167,9 @@ workflow 不使用 `actions/checkout`，不使用 `npm install` 或 `npm run`，
 - [Dependabot on GitHub Actions](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-on-actions)
 - [`dependabot/fetch-metadata` README](https://github.com/dependabot/fetch-metadata)
 - [Automatically merging a pull request](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/automatically-merging-a-pull-request)
+
+## 本次扩展范围
+
+用户随后明确要求同时落实全部 CI 审查建议。因此本轮还会修改构建、翻译同步和 Dependabot 分组，并配置远端检查门槛、Auto-merge 与 Actions 审批前提；原“非目标”描述的是最初单独实现自动合并 workflow 的范围。两个生态、周更频率、每生态 5 个待处理 PR 上限保持不变。
+
+实现兼容 GitHub CLI 返回的 `app/dependabot` 作者格式，并以事件里的 `dependabot[bot]` 及 fetch-metadata 默认签名校验作为额外约束。对 reviews 分页读取，按用户取最新有效审批状态，避免在没有必需审批规则时遗漏人工 CHANGES_REQUESTED。

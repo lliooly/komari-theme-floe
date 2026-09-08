@@ -2,67 +2,95 @@ name: i18n sync
 
 on:
   push:
-    branches: ["**"]
-  workflow_dispatch: {}
+    branches: [main]
+    paths:
+      - 'src/i18n/locales/**'
+      - 'src/i18n/source-snapshot.json'
+      - 'script/i18n-sync.mjs'
+      - 'script/i18n-sync.test.mjs'
+      - '.github/workflows/i18n-sync.yml'
+      - '.nvmrc'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: i18n-sync-main
+  cancel-in-progress: false
 
 jobs:
   sync:
-    # 避免由机器人再次触发循环
-    if: ${{ github.actor != 'github-actions[bot]' }}
+    if: github.repository == 'lliooly/komari-theme-floe' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
     permissions:
       contents: write
-    concurrency:
-      group: i18n-sync-${{ github.ref }}
-      cancel-in-progress: true
+      pull-requests: write
+      actions: write # Explicitly dispatch checks for GITHUB_TOKEN-created commits.
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      - name: Checkout current main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          ref: main
+          persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version-file: .nvmrc
+          package-manager-cache: false
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          npm ci --no-audit --no-fund || npm i --no-audit --no-fund
+      - name: Plan locale changes without network requests
+        id: plan
+        run: node script/i18n-sync.mjs --dry-run
 
-      - name: Run i18n sync
+      - name: Generate and validate translations
+        if: steps.plan.outputs.changed == 'true'
+        timeout-minutes: 8
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
-          #I18N_LOCALES_DIR: ${{ vars.I18N_LOCALES_DIR }}
-          #I18N_SOURCE: ${{ vars.I18N_SOURCE }}
-          #I18N_AI_BATCH_SIZE: ${{ vars.I18N_AI_BATCH_SIZE }}
-          #I18N_AI_MAX_INPUT_CHARS: ${{ vars.I18N_AI_MAX_INPUT_CHARS }}
+          I18N_AI_TIMEOUT_MS: '30000'
         run: |
           node script/i18n-sync.mjs
+          node script/i18n-sync.mjs --check
 
-      - name: Check for changes
-        id: diff
-        shell: bash
+      - name: Install dependencies only for changed translations
+        if: steps.plan.outputs.changed == 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify generated changes before opening a PR
+        if: steps.plan.outputs.changed == 'true'
         run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
+          npm run lint
+          npm test
+          npm run build
 
-      - name: Commit and push changes
-        if: steps.diff.outputs.changed == 'true'
-        shell: bash
+      - name: Create or update translation PR
+        if: steps.plan.outputs.changed == 'true'
+        id: pr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ github.token }}
+          branch: automation/i18n-sync
+          base: main
+          add-paths: |
+            src/i18n/locales/*.json
+            src/i18n/source-snapshot.json
+          commit-message: 'chore(i18n): sync validated translations'
+          title: 'chore(i18n): sync validated translations'
+          body: |
+            Updates translations and the source snapshot after validating JSON,
+            interpolation placeholders, lint, regression tests and the static build.
+            Review the translated wording before merging. The build workflow is
+            explicitly dispatched because GITHUB_TOKEN pushes do not trigger push CI.
+
+      - name: Run required build for the translation PR commit
+        if: steps.pr.outputs.pull-request-number != ''
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore(i18n): sync locales [skip ci]"
-          git push origin HEAD:${GITHUB_REF#refs/heads/}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run build.yaml --ref automation/i18n-sync

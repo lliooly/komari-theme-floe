@@ -11,7 +11,10 @@
     "test": "node --test script/*.test.mjs",
     "preview": "node script/preview.mjs",
     "i18n:sync": "node ./script/i18n-sync.mjs",
-    "i18n:sync:dry": "node ./script/i18n-sync.mjs --dry-run"
+    "i18n:sync:dry": "node ./script/i18n-sync.mjs --dry-run",
+    "i18n:validate": "node ./script/i18n-sync.mjs --validate",
+    "i18n:check": "node ./script/i18n-sync.mjs --check",
+    "lint:workflows": "bash script/check-workflows.sh"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
