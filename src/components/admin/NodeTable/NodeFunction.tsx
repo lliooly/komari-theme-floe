@@ -5,6 +5,7 @@ import { DataTableRefreshContext } from "@/components/admin/NodeTable/schema/Dat
 import { Terminal, Trash2, Copy, Download, DollarSign } from "@/components/Icones/Reicon";
 import { t } from "i18next";
 import type { Row } from "@tanstack/react-table";
+import type { NodeTableFeatures } from "./schema/tableFeatures";
 import { EditDialog } from "./NodeEditDialog";
 import {
   Button,
@@ -42,7 +43,11 @@ type InstallOptions = {
 
 type Platform = "linux" | "windows" | "macos";
 
-export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
+export function ActionsCell({
+  row,
+}: {
+  row: Row<NodeTableFeatures, z.infer<typeof schema>>;
+}) {
   const refreshTable = React.useContext(DataTableRefreshContext);
   const { status: copyStatus, run: runCopy } = useActionFeedback();
   const { status: removeStatus, run: runRemove } = useActionFeedback();
