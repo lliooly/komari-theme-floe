@@ -48,14 +48,14 @@ npm run build
 
 1. `allow_auto_merge: true`，允许 merge commit。
 2. Actions `can_approve_pull_request_reviews: true`；默认 token 权限继续为 read。
-3. main 生效规则要求 `build` 检查来自 GitHub Actions（integration ID 15368），并开启 strict 检查。
-4. 保留 main 的禁止删除和禁止强推规则。
+3. 独立的 `Main CI gate` 规则要求 `build` 检查来自 GitHub Actions（integration ID 15368），并开启 strict 检查。仅 RepositoryRole Admin（ID 5）可跳过这条构建门槛，保留个人仓库管理员直接推送 main 的工作方式；Dependabot、GitHub Actions 和其他角色没有绕过权限。
+4. `Protect-main` 单独保留 main 的禁止删除和禁止强推规则，不设置绕过角色，管理员也不能绕过这两条保护。
 
 自动合并任务会重新读取当前 PR，检查头提交、草稿状态、同仓库来源和目标分支；按用户汇总分页 reviews，尊重最新 CHANGES_REQUESTED，审批绑定当前 commit，启用合并使用 `--match-head-commit`。已存在当前提交审批及 Auto-merge 时不重复写入。
 
 major、未知 metadata、存在人工修改请求时保留人工处理。前提设置缺失、API 错误或 merge queue 配置会失败关闭，不用其他 token 重试。`fetch-metadata` 默认作者/签名验证保持开启。
 
-main 的实际 required check 名称是 `build`，不是工作流标题拼接字符串。设置门槛后，不具备该检查的新提交不能直接进入 main；正常通过 PR 检查后合入。不额外要求个人仓库使用多人审批。
+main 的实际 required check 名称是 `build`，不是工作流标题拼接字符串。管理员可以直接推送 main，推送后仍会执行完整 CI；自动化账号及其他角色必须等待 `build` 通过。管理员的例外只适用于构建门槛，不适用于删除或强推。不额外要求个人仓库使用多人审批。
 
 新工作流文件需要先合入默认分支，`pull_request_target` 才会使用它。已有 Dependabot PR 在下一次 synchronize/reopened/ready_for_review 事件重新评估；部署文件本身不会追溯审批所有历史 PR。
 
