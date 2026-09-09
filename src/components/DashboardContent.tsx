@@ -178,6 +178,7 @@ export default function DashboardContent() {
 
   useEffect(() => {
     if (isLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the reveal gate when data loading starts
       setRevealReady(false);
       return;
     }

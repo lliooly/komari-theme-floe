@@ -42,6 +42,7 @@ export function useAnimatedNumber(
 
     if (!canAnimate) {
       valueRef.current = value;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronize the non-animated value immediately
       setAnimatedValue(value);
       return;
     }

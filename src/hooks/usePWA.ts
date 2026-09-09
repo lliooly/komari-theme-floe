@@ -24,6 +24,7 @@ export const usePWA = (): PWAState => {
       (window.navigator as any).standalone || 
       document.referrer.includes('android-app://');
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate browser-only PWA state after SSR
     setState(prev => ({
       ...prev,
       isStandalone,

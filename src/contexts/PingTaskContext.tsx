@@ -59,6 +59,7 @@ export const PingTaskProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initialize the provider's async loading state
     setIsLoading(true);
 
     refresh();

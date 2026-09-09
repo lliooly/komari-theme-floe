@@ -80,6 +80,7 @@ const LoginDialogContent = ({
 
   React.useEffect(() => {
     if (autoOpen && !onlyOAuthLogin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- open the dialog after authentication capabilities are known
       setOpen(true);
     }
   }, [autoOpen, onlyOAuthLogin]);

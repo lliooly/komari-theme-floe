@@ -346,6 +346,7 @@ export default function RemainingValueCalculator() {
       ratesState &&
       typeof ratesState.rates[displayCurrency] !== "number"
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- start the missing-rate fetch after the panel opens
       void refreshRates(false);
     }
   }, [displayCurrency, open, ratesState, refreshRates, snapshot.active.length]);

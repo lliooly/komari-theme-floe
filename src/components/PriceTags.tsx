@@ -32,6 +32,8 @@ const tagColors: BadgeColor[] = [
   "sky",
 ];
 
+const DEFAULT_EXPIRED_AT = Date.now() + 30 * 24 * 60 * 60 * 1000;
+
 function isBadgeColor(color: string): color is BadgeColor {
   return tagColors.includes(color as BadgeColor);
 }
@@ -40,7 +42,7 @@ const PriceTags = ({
   price = 0,
   billing_cycle = 30,
   currency = "￥",
-  expired_at = Date.now() + 30 * 24 * 60 * 60 * 1000,
+  expired_at = DEFAULT_EXPIRED_AT,
   tags = "",
   ip4 = "",
   ip6 = "",

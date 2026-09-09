@@ -64,6 +64,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
   const [nodeViewMode, setNodeViewMode] = useNodeViewMode();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync the editable background draft from managed settings
     setBgUrlInput(themeConfig.backgroundImageUrl || '');
   }, [themeConfig.backgroundImageUrl]);
 

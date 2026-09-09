@@ -33,6 +33,7 @@ export default function DarkModeToggle() {
 
   // Avoid hydration mismatch
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- establish the client-only render boundary
     setMounted(true);
   }, []);
 

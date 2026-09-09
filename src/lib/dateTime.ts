@@ -100,13 +100,13 @@ function isSupportedTimeZone(timeZone: string) {
 }
 
 export function getSupportedTimeZones(preferredTimeZone: string) {
-  let supportedTimeZones: string[] = [];
-
-  try {
-    supportedTimeZones = Intl.supportedValuesOf("timeZone");
-  } catch {
-    supportedTimeZones = [];
-  }
+  const supportedTimeZones = (() => {
+    try {
+      return Intl.supportedValuesOf("timeZone");
+    } catch {
+      return [];
+    }
+  })();
 
   return Array.from(new Set([preferredTimeZone, "UTC", ...supportedTimeZones]))
     .filter((timeZone) => Boolean(timeZone) && isSupportedTimeZone(timeZone))

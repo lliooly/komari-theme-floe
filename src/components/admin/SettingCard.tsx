@@ -357,6 +357,7 @@ export function SettingCardShortTextInput({
   // 当外部value改变时，同步内部状态
   React.useEffect(() => {
     if (value !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronize the controlled value into the editable draft
       setInternalValue(value.toString());
     }
   }, [value]);
@@ -554,6 +555,7 @@ export function SettingCardSelect({
 
   React.useEffect(() => {
     if (value !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronize the controlled value into the editable draft
       setSelectedValue(value);
     }
   }, [value]);

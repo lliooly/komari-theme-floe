@@ -42,6 +42,7 @@ const NodeSelectorDialog: React.FC<NodeSelectorDialogProps> = ({
   // 临时选中，只有点击确定才提交
   const [temp, setTemp] = React.useState<string[]>(value ?? []);
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resync the draft when a controlled dialog opens
     if (open) setTemp(value ?? []);
   }, [open, value]);
 

@@ -113,6 +113,7 @@ export const CommandClipboardProvider: React.FC<{
   };
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start the provider's initial async clipboard fetch
     refresh();
   }, []);
   return (

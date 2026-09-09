@@ -85,6 +85,7 @@ export function usePingStats(uuid: string, hours: number = 24, enabled: boolean 
     }
 
     if (!uuid.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset async stats when its source key is empty
       setStats(createEmptyStats({ isLoaded: true }));
       return;
     }

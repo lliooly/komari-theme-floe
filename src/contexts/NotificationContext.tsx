@@ -44,6 +44,7 @@ export const OfflineNotificationProvider: React.FC<{ children: React.ReactNode }
   };
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start the provider's initial async notification fetch
     refresh();
   }, []);
 

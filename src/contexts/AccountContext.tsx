@@ -59,6 +59,7 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
     
     React.useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- start the provider's initial async account fetch
         refresh();
     }, []);
     

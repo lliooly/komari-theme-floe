@@ -77,11 +77,11 @@ export function ActionsCell({
       args.push("--ignore-unsafe-cert");
     }
     if (installOptions.ghproxy) {
-      if (!installOptions.ghproxy.startsWith("http")) {
-        installOptions.ghproxy = `http://${installOptions.ghproxy}`;
-      }
+      const ghproxy = installOptions.ghproxy.startsWith("http")
+        ? installOptions.ghproxy
+        : `http://${installOptions.ghproxy}`;
       args.push(`--install-ghproxy`);
-      args.push(installOptions.ghproxy);
+      args.push(ghproxy);
     }
     if (installOptions.dir) {
       args.push(`--install-dir`);

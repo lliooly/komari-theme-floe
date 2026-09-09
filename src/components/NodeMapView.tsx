@@ -92,9 +92,7 @@ export function NodeMapView({
   const pendingHoverPositionRef = useRef<Omit<HoveredRegion, "regionKey"> | null>(null);
   const hoverRegion =
     summary.regions.find((region) => region.key === hoveredRegion?.regionKey) ?? null;
-  const hoverPosition = hoveredRegion
-    ? pendingHoverPositionRef.current ?? hoveredRegion
-    : null;
+  const hoverPosition = hoveredRegion;
 
   const activeRegionsByMapName = useMemo(
     () => new Map(summary.regions.map((region) => [region.mapName, region])),

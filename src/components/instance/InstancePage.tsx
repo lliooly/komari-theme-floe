@@ -40,6 +40,7 @@ export default function InstancePage({ uuid }: InstancePageProps) {
     if (!uuid) return;
     
     const controller = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear records before loading a different instance
     setRecent([]);
     fetchJson<{ data: Record[] }>(`/api/recent/${encodeURIComponent(uuid)}`, { signal: controller.signal })
       .then((data) => {

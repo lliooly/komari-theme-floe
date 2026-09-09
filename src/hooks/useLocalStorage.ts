@@ -11,6 +11,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const item = window.localStorage.getItem(key);
       if (item !== null) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate the hook from browser storage after SSR
         setStoredValue(JSON.parse(item) as T);
       }
     } catch (error) {
