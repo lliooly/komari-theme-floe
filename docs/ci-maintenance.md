@@ -24,7 +24,7 @@ npm run build
 
 `lint:workflows` 优先使用 PATH 中的 actionlint。GitHub 的 Linux x64 runner 没有该工具时，下载固定 1.7.12 版本并验证仓库内固定的 SHA-256；其他平台请先安装 actionlint。升级校验器时同时更新版本与校验和。
 
-普通 PR 产物保留 3 天，main、标签和手动构建产物保留 7 天；已经压缩的 ZIP 不再进行第二次压缩。每个质量检查 job 只安装一次依赖，不拆分成重复安装的 lint/test/build jobs。当前构建较快，未引入跨运行产物复用或额外 Next 缓存。
+PR 只执行质量检查，不上传发布产物；main、标签和手动构建产物保留 7 天。这样避免 Dependabot 的受限 PR token 在无用的 artifact finalize 阶段失败，也减少存储消耗。已经压缩的 ZIP 不再进行第二次压缩。每个质量检查 job 只安装一次依赖，不拆分成重复安装的 lint/test/build jobs。当前构建较快，未引入跨运行产物复用或额外 Next 缓存。
 
 ## 翻译维护
 
