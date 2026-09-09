@@ -19,6 +19,7 @@ export function Callouts() {
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read browser-only state after hydration
     setMounted(true);if (typeof window !== "undefined") {
       setIsHttps(window.location.protocol === "https:");
     }

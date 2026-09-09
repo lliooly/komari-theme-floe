@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import {
   CheckCircle2,
   CircleAlert,
@@ -123,6 +123,7 @@ function HeartbeatBar({
   unavailableLabel: string;
   t: TFunction;
 }) {
+  const [now, setNow] = useState(() => Date.now());
   const visibleHeartbeats = service.heartbeats.slice(-MAX_HEARTBEAT_SEGMENTS);
   const missingHeartbeatCount = Math.max(
     0,
@@ -134,11 +135,16 @@ function HeartbeatBar({
   const historyRange =
     oldestTimestamp === undefined || oldestTimestamp === null
       ? unavailableLabel
-      : formatCompactDuration(Math.max(0, Date.now() - oldestTimestamp));
+      : formatCompactDuration(Math.max(0, now - oldestTimestamp));
   const lastHeartbeatAge =
     service.lastHeartbeatAt === null
       ? unavailableLabel
-      : formatCompactDuration(Math.max(0, Date.now() - service.lastHeartbeatAt));
+      : formatCompactDuration(Math.max(0, now - service.lastHeartbeatAt));
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <div className="w-full min-w-0 flex-1 rounded-md border border-emerald-500/15 bg-emerald-500/[0.06] px-2.5 py-2">

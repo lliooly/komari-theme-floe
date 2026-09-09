@@ -50,6 +50,7 @@ const NavBar = () => {
   const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset a failed image state when the configured URL changes
     setLogoLoadFailed(false);
   }, [logoUrl]);
 

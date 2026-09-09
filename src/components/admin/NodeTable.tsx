@@ -186,6 +186,7 @@ export function DataTable() {
   }
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset request state before loading the admin list
     setIsLoading(true);
     setError(null);
     fetch("/api/admin/client/list")

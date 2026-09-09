@@ -47,6 +47,8 @@ function EditorForm() {
   const [timezone, setTimezone] = useState("UTC");
 
   useEffect(() => {
+    // The browser timezone is external state and must be read after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronize the client timezone after SSR
     setTimezone(getSystemTimeZone());
   }, []);
 

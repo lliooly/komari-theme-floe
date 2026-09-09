@@ -168,7 +168,7 @@ const NodeTable: React.FC<NodeTableProps> = ({
       return a.weight - b.weight;
     }
 
-    let comparison = 0;
+    let comparison: number;
     switch (sortState.field) {
       case 'name':
         comparison = a.name.localeCompare(b.name);

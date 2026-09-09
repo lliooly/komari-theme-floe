@@ -16,6 +16,8 @@ export function CurrentTimeCard({ className }: CurrentTimeCardProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // The mount flag intentionally gates client-only time rendering to avoid hydration mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- establish the client-only render boundary
     setMounted(true);
     const updateTime = () => setTime(new Date().toLocaleTimeString());
     updateTime();

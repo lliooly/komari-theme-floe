@@ -73,6 +73,7 @@ export const PublicInfoProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start the provider's initial async public-info fetch
     refresh();
   }, []);
 

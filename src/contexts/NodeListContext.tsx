@@ -165,6 +165,7 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [call]);
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start the provider's initial async node fetch
     refresh();
   }, [refresh]);
 

@@ -52,13 +52,13 @@ export function normalizeLanguage(language: string | null | undefined): string |
     return undefined;
   }
 
-  let decodedLanguage = language;
-  try {
-    decodedLanguage = decodeURIComponent(language);
-  } catch {
-    decodedLanguage = language;
-  }
-  decodedLanguage = decodedLanguage.replace("_", "-");
+  const decodedLanguage = (() => {
+    try {
+      return decodeURIComponent(language);
+    } catch {
+      return language;
+    }
+  })().replace("_", "-");
   if (supportedLanguages.includes(decodedLanguage)) {
     return decodedLanguage;
   }
@@ -89,8 +89,7 @@ export function detectClientLanguage(): string {
     managedOverrideLanguage = window.localStorage?.getItem("komari-language") || null;
     localStorageLanguage = window.localStorage?.getItem("i18nextLng") || null;
   } catch {
-    managedOverrideLanguage = null;
-    localStorageLanguage = null;
+    // Storage can be unavailable in private browsing contexts.
   }
   const cookieLanguage = document.cookie
     .split("; ")

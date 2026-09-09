@@ -107,6 +107,7 @@ const PingChart = ({ uuid }: { uuid: string }) => {
 
   useEffect(() => {
     if (!view && initialView) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- select the first available view after server data arrives
       setView(initialView);
       return;
     }
@@ -119,6 +120,7 @@ const PingChart = ({ uuid }: { uuid: string }) => {
 
   useEffect(() => {
     if (!uuid.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset async chart state when its source key is empty
       setRemoteData(null);
       setTasks([]);
       setError(null);

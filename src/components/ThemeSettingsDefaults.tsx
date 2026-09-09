@@ -65,10 +65,12 @@ export default function ThemeSettingsDefaults() {
   const [uptimeSlug, setUptimeSlug] = useState(managedUptimeKuma.slug);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync the editable draft from managed settings
     setLogoUrlInput(managedLogoUrl);
   }, [managedLogoUrl]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync the editable draft from managed settings
     setUptimeEnabled(managedUptimeKuma.enabled);
     setUptimeBaseUrl(managedUptimeKuma.baseUrl);
     setUptimeSlug(managedUptimeKuma.slug);

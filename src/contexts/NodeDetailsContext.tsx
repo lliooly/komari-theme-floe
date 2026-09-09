@@ -54,6 +54,7 @@ export const NodeDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ c
       });
   };
     React.useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- initialize the provider's async loading state
         setIsLoading(true);
         refresh();
     }, []);

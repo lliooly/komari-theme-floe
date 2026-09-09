@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { cutPeakValues, interpolateNullsLinear } from "@/utils/RecordHelper";
 import Tips from "./ui/tips";
 import { useRPC2Call } from "@/contexts/RPC2Context";
@@ -27,6 +28,65 @@ const colors = [
   "#FF8A65",
   "#FFD600",
 ];
+
+function MiniPingChartTooltip({
+  active,
+  payload,
+  label,
+  tasks,
+  t,
+}: {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+  tasks: PingTaskInfo[];
+  t: TFunction;
+}) {
+  if (!active || !payload || !payload.length) return null;
+
+  const date = new Date(label ?? "");
+  const formattedDate = date.toLocaleString([], {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  return (
+    <div className="pointer-events-auto max-h-[min(60dvh,22rem)] min-w-[12rem] max-w-[min(22rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-lg bg-background p-2 shadow-sm touch-pan-y">
+      <div className="text-xs text-muted-foreground mb-2">{formattedDate}</div>
+      <div className="grid gap-1">
+        {payload.map((entry: any, index: number) => {
+          if (entry.value === null) return null;
+          const task = tasks.find((item) => String(item.id) === entry.dataKey);
+          if (!task) return null;
+
+          const lossText = typeof task.loss === "number" ? `${task.loss.toFixed(1)}%` : "N/A";
+          const volText = typeof task.p99_p50_ratio === "number" ? task.p99_p50_ratio.toFixed(1) : "N/A";
+
+          return (
+            <div key={index} className="flex flex-col gap-0.5">
+              <div className="flex min-w-0 items-center gap-2">
+                <div
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="min-w-0 truncate text-sm font-medium" title={task.name}>{task.name}</span>
+              </div>
+              <div className="ml-4 text-xs">
+                <div>{Math.round(entry.value)} ms</div>
+                <div className="text-muted-foreground">
+                  {lossText} {t("chart.lossRate")} / {volText} {t("chart.volatility")}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 interface MiniPingChartProps {
   uuid: string;
@@ -51,6 +111,7 @@ const MiniPingChart = ({
   const { call } = useRPC2Call();
   useEffect(() => {
     if (!uuid.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset async chart state when its source key is empty
       setRemoteData(null);
       setTasks([]);
       setError(null);
@@ -171,53 +232,6 @@ const MiniPingChart = ({
     return config;
   }, [tasks]);
 
-  const CustomTooltip = useCallback(({ active, payload, label }: any) => {
-    if (!active || !payload || !payload.length) return null;
-
-    const date = new Date(label);
-    const formattedDate = date.toLocaleString([], {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-
-    return (
-      <div className="pointer-events-auto max-h-[min(60dvh,22rem)] min-w-[12rem] max-w-[min(22rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-lg bg-background p-2 shadow-sm touch-pan-y">
-        <div className="text-xs text-muted-foreground mb-2">{formattedDate}</div>
-        <div className="grid gap-1">
-          {payload.map((entry: any, index: number) => {
-            if (entry.value === null) return null;
-            const task = tasks.find(t => String(t.id) === entry.dataKey);
-            if (!task) return null;
-
-            const lossText = typeof task.loss === 'number' ? `${task.loss.toFixed(1)}%` : 'N/A';
-            const volText = typeof task.p99_p50_ratio === 'number' ? task.p99_p50_ratio.toFixed(1) : 'N/A';
-
-            return (
-              <div key={index} className="flex flex-col gap-0.5">
-                <div className="flex min-w-0 items-center gap-2">
-                  <div
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: entry.color }}
-                  />
-                  <span className="min-w-0 truncate text-sm font-medium" title={task.name}>{task.name}</span>
-                </div>
-                <div className="ml-4 text-xs">
-                  <div>{Math.round(entry.value)} ms</div>
-                  <div className="text-muted-foreground">
-                    {lossText} {t('chart.lossRate')} / {volText} {t('chart.volatility')}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }, [tasks, t]);
-
   const handleLegendClick = useCallback((e: any) => {
     const key = e.dataKey;
     setHiddenLines((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -282,7 +296,7 @@ const MiniPingChart = ({
               />
               <ChartTooltip
                 cursor={false}
-                content={<CustomTooltip />}
+                content={<MiniPingChartTooltip tasks={tasks} t={t} />}
                 allowEscapeViewBox={{ x: true, y: true }}
                 wrapperStyle={{ pointerEvents: "auto", zIndex: 20 }}
               />

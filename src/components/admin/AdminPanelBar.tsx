@@ -199,6 +199,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
         );
       }
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- derive expanded menu state from the current route
     setOpenSubMenus(newState);
   }, [location.pathname, extraMenuItems]);
 

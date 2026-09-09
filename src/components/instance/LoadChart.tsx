@@ -94,6 +94,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the selected view when retention settings change
     setHoursView("real-time");
   }, [max_record_preserve_time]);
 
@@ -102,6 +103,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   useEffect(() => {
     if (!uuid) return;
     if (!selectedHours) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear chart state when no range is available
       setRemoteData(null);
       setError(null);
       setLoading(false);

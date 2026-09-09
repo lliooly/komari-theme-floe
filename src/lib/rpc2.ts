@@ -266,7 +266,7 @@ export class RPC2Client {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error(`请求失败: ${method}`);
+      throw new Error(`请求失败: ${method}`, { cause: error });
     }
   }
 
@@ -311,7 +311,7 @@ export class RPC2Client {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error("批量请求失败");
+      throw new Error("批量请求失败", { cause: error });
     }
   }
 
