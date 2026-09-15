@@ -29,14 +29,8 @@ import {
 } from '@/hooks/useStatusCardsVisibility';
 import { useNodeViewMode } from '@/hooks/useNodeViewMode';
 import { cn } from '@/lib/utils';
-import AnnouncementEditor from './AnnouncementEditor';
-import ThemeSettingsDefaults from './ThemeSettingsDefaults';
 
-type ThemeSwitcherProps = {
-  variant?: 'popover' | 'page';
-};
-
-const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
+const ThemeSwitcher = () => {
   const {
     themeConfig,
     setColorTheme,
@@ -210,26 +204,13 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
     },
   ];
 
-  const settingsSectionClassName = variant === 'page'
-    ? 'rounded-2xl border border-border/70 bg-card/35 p-4 shadow-sm md:p-6'
-    : 'pt-3';
-
-  // The page variant is an admin-only surface. Keep this guard here as a
-  // second boundary in case the component is ever rendered outside the page.
-  if (variant === 'page' && !isThemeSettingsAdmin) {
-    return null;
-  }
+  const settingsSectionClassName = 'pt-3';
 
   const settingsPanel = (
-    <div className={variant === 'page' ? 'flex flex-col gap-6' : 'flex flex-col gap-4'}>
-      {variant === 'page' && <ThemeSettingsDefaults />}
-      <AnnouncementEditor variant={variant === 'page' ? 'inline' : 'dialog'} />
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+    <div className="flex flex-col gap-4">
+          <div className={settingsSectionClassName}>
             <h4 className={cn(
-              'font-semibold text-sm mb-3 flex items-center gap-2',
-              variant === 'page'
-                ? 'border-b border-border/60 pb-3'
-                : 'sticky -top-4 z-10 -mx-4 bg-popover px-4 pb-2 pt-4',
+              'sticky -top-4 z-10 -mx-4 bg-popover px-4 pb-2 pt-4 font-semibold text-sm mb-3 flex items-center gap-2',
             )}>
               <Palette className="h-4 w-4" />
               {t('themeCustomizer.colorTheme', { defaultValue: 'Color Theme' })}
@@ -254,7 +235,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Layout className="h-4 w-4" />
               {t('themeCustomizer.cardLayout', { defaultValue: 'Card Layout' })}
@@ -287,7 +268,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Activity className="h-4 w-4" />
               {t('themeCustomizer.cardDesign', { defaultValue: 'Card Design' })}
@@ -320,7 +301,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Layout className="h-4 w-4" />
               {t('themeCustomizer.cardBackground', { defaultValue: 'Card Background' })}
@@ -403,7 +384,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Settings className="h-4 w-4" />
               {t("status_settings")}
@@ -426,7 +407,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
           </div>
 
           {isThemeSettingsAdmin && (
-            <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+            <div className={settingsSectionClassName}>
               <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 {t("themeCustomizer.guestDisplay.title", { defaultValue: "Guest Display" })}
@@ -452,7 +433,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           )}
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Gauge className="h-4 w-4" />
               {t('themeCustomizer.statusDesign', { defaultValue: 'Status Design' })}
@@ -485,7 +466,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Layout className="h-4 w-4" />
               {t("nodeDisplay.defaultView", { defaultValue: "Default View" })}
@@ -534,7 +515,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <PieChart className="h-4 w-4" />
               {t('themeCustomizer.graphDesign', { defaultValue: 'Graph Design' })}
@@ -567,7 +548,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </div>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs font-medium text-muted-foreground">
                 {t('themeCustomizer.showRamDiskTotal', { defaultValue: 'Show Total RAM/Disk' })}
@@ -582,7 +563,7 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
             </p>
           </div>
 
-          <div className={settingsSectionClassName} data-card-blur-surface={variant === 'page' ? 'true' : undefined}>
+          <div className={settingsSectionClassName}>
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Image className="h-4 w-4" />
               {t('themeCustomizer.backgroundImage', { defaultValue: 'Background Image' })}
@@ -705,10 +686,6 @@ const ThemeSwitcher = ({ variant = 'popover' }: ThemeSwitcherProps) => {
           </div>
     </div>
   );
-
-  if (variant === 'page') {
-    return settingsPanel;
-  }
 
   return (
     <Popover>

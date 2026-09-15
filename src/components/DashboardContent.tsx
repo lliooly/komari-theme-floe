@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Suspense, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import {
   ArrowUpDown,
@@ -22,12 +23,58 @@ import { useTheme } from "@/contexts/ThemeContext";
 import Loading from "@/components/loading";
 import { CurrentTimeCard } from "@/components/CurrentTimeCard";
 import { Callouts } from "@/components/DashboardCallouts";
-import { NodeMapView } from "@/components/NodeMapView";
+import type { NodeMapViewProps } from "@/components/NodeMapView";
 import UptimeKumaStatus from "@/components/UptimeKumaStatus";
 import { useStatusCardsVisibility } from "@/hooks/useStatusCardsVisibility";
 import { useMounted } from "@/hooks/useMounted";
 import { AnimatedNumber, DataChange } from "@/components/ui/animated-number";
 import { getRevealProps } from "@/lib/reveal";
+import { createVisibilityPoller } from "@/lib/polling";
+
+const DynamicNodeMapView = dynamic<NodeMapViewProps>(
+  () => import("@/components/NodeMapView").then((module) => ({ default: module.NodeMapView })),
+  {
+    ssr: false,
+    loading: () => <NodeMapPlaceholder />,
+  },
+);
+
+function NodeMapPlaceholder() {
+  return (
+    <div
+      aria-hidden="true"
+      className="w-full rounded-2xl border border-border/50 bg-card/30"
+      style={{ minHeight: "clamp(500px, 42vw, 560px)" }}
+    />
+  );
+}
+
+function LazyNodeMapView(props: NodeMapViewProps) {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const [shouldLoad, setShouldLoad] = React.useState(false);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === "undefined") {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: "200px 0px" },
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  return <div ref={containerRef}>{shouldLoad ? <DynamicNodeMapView {...props} /> : <NodeMapPlaceholder />}</div>;
+}
 
 // Intelligent speed formatting function
 const formatSpeed = (bytes: number): string => {
@@ -336,10 +383,14 @@ export default function DashboardContent() {
   ];
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      refresh();
-    }, 5000);
-    return () => clearInterval(interval);
+    return createVisibilityPoller({
+      intervalMs: 5_000,
+      maxBackoffMs: 30_000,
+      poll: async ({ isCurrent }) => {
+        const succeeded = await refresh();
+        return isCurrent() && succeeded;
+      },
+    });
   }, [refresh]);
 
   if (isLoading) {
@@ -395,7 +446,7 @@ export default function DashboardContent() {
         </div>
 
         {mounted && isThemeLoaded && statusCardsVisibility.mapView && (
-          <NodeMapView
+          <LazyNodeMapView
             nodes={nodeList ?? []}
             liveData={live_data?.data ?? { online: [], data: {} }}
             mapOnly

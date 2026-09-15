@@ -1,184 +1,200 @@
 # Floe
 
-Floe is an independently maintained third-party theme for the Komari monitoring project.
-It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI** and packaged as a static site that can be used as a Komari theme.
+[![Build and Release Floe Theme](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml)
+[![MIT License](https://img.shields.io/github/license/lliooly/komari-theme-floe)](./LICENSE)
 
 [中文](./README-CN.md)
 
-[Demo](https://komari.probe.name)
+[Demo](https://komari.probe.name) · [Download the latest theme package](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip) · [All releases](https://github.com/lliooly/komari-theme-floe/releases)
 
-[Download theme file](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip)
+Floe is an independently maintained third-party theme for [Komari](https://github.com/komari-monitor/komari). It is a static [Next.js](https://nextjs.org/) frontend that reads live data from a running Komari backend and can be installed through Komari's theme manager as a ZIP package.
 
-> This repository contains only the frontend. You will need a running Komari backend instance for the UI to talk to. Or you can download the theme file and upload it through Komari's admin dashboard, this would be the recommanded way.
+> Floe is not an official Komari or Komari Next release and does not represent either project's endorsement.
 
-![preview](https://github.com/lliooly/komari-theme-floe/blob/main/preview.png?raw=true)
-![dark-theme](https://github.com/lliooly/komari-theme-floe/blob/main/images/dark-theme.png?raw=true)
+![Floe preview](https://github.com/lliooly/komari-theme-floe/blob/main/preview.png?raw=true)
+
+![Floe dark theme preview](https://github.com/lliooly/komari-theme-floe/blob/main/images/dark-theme.png?raw=true)
 
 ## Features
 
-- Map! Map! Map!
-- Able to set settings in admin panel
-- Remaining Value Calculator
-- Real‑time dashboard for server and node status
-- Instance detail pages with load and latency charts
-- Node list and management views
-- Internationalization (i18n) with `react-i18next`
-- Responsive layout and dark mode using Shadcn + Tailwind CSS
-- Theme packaging suitable for Komari's theme system
-- **Extensive Customization Options:**
-  - **6 Color Themes:** Default, Ocean, Sunset, Forest, Midnight, Rose
-  - **4 Card Layouts:** Classic, Modern, Minimal, Detailed - each with unique visual designs and element positioning
-  - **4 Graph Designs:** Circle, Progress Bar, Bar Chart, Minimal - all following the selected color theme
-  - **Customizable Status Cards:** Show/hide individual metrics on the dashboard
-  - **Bring your own background!** Use an image URL to set it as the background.
-  - **Background Blur:** Add soft or glass blur effects to custom background images, with adjustable intensity.
-  - **Card Blur:** Enable soft or glass card backgrounds, tune card transparency, and adjust extra blur separately.
-  - The embedded Theme Settings page keeps its page background transparent while using the same card background and glass blur system as the homepage.
-  - **Ping stats display** Show package information at homepage straight away!
-  - All settings persist locally and sync across theme changes
+### Monitoring experience
 
-## Tech Stack
+- Live dashboard data with periodic refresh.
+- Summary cards for current time, online nodes, regions, traffic and network speed.
+- World map view for node locations.
+- Node explorer with search, group filters, online/offline status, and grid or table view.
+- Instance detail pages at <code>/instance/&lt;uuid&gt;</code> with load and latency charts.
+- Optional Uptime Kuma status panel with service groups, status badges, heartbeat history, latest ping and 24-hour uptime.
+- Remaining value calculator for deployments that expose pricing and expiration data.
+- Responsive layout, dark mode, reduced-motion support and localized UI.
 
-- **Framework:** Next.js (App Router, static export)
-- **Language:** TypeScript, React
-- **UI:** Shadcn UI + Radix UI primitives, Tailwind CSS v4
-- **Charts:** Recharts
-- **State / Data:** Custom contexts, RPC2 client, fetch-based APIs
+### Personalization
 
-## Prerequisites
+- Six color themes: Default, Ocean, Sunset, Forest, Midnight and Rose.
+- Five card layouts: Classic, Modern, Minimal, Detailed and Compact.
+- Alternate card and status designs, including latency history bars and speed gauges.
+- Four graph designs: Circle, Progress Bar, Bar Chart and Minimal.
+- Custom background images with mask, soft blur or glass blur controls.
+- Card background transparency and blur controls.
+- Per-card visibility, RAM/disk total display, guest price and expiration display.
+- Node grid/table preference, custom logo URL and light/dark/system appearance.
+- English, Simplified Chinese and Traditional Chinese interfaces.
+- Local visitor preferences plus administrator-managed defaults shared by the Komari instance.
 
-- **Node.js** 22 or newer (LTS recommended)
-- A running **Komari backend** (API) reachable from the browser
-- **Komari 1.2.1 or newer** for Floe's embedded custom Theme Settings page
+## Requirements
 
-## Getting Started
+- Node.js 22 or newer for local development and packaging.
+- A running Komari backend whose API is reachable from the browser.
+- Komari 1.0.5 or newer for the native theme settings form.
 
-- Simply [download the theme file](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip) and upload it through Komari's admin dashboard. This is the recommended way to install Floe.
+## Install Floe
 
-## Dev
+The recommended installation method is to use the prebuilt theme package:
 
-Clone this repository and install dependencies:
+1. [Download the latest <code>dist-release.zip</code>](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip).
+2. Open Komari's administrator dashboard and go to theme management.
+3. Upload the ZIP package and activate Floe.
 
-```bash
-npm install
-```
+The release package contains <code>komari-theme.json</code>, <code>preview.png</code> and the static <code>dist/</code> directory. Upload the release package rather than the source repository.
 
-### Configure API target
+## Develop locally
 
-The frontend talks to the Komari backend via `/api/*` rewrites configured in `next.config.ts`.  
-Set the backend base URL using `NEXT_PUBLIC_API_TARGET`:
+Clone the repository and install the locked dependency versions:
 
-Create a `.env.local` file in the project root:
+~~~bash
+git clone https://github.com/lliooly/komari-theme-floe.git
+cd komari-theme-floe
+npm ci
+~~~
 
-```env
+### Configure the Komari API
+
+Create <code>.env.local</code> in the project root when the backend is not available at the default address:
+
+~~~env
 NEXT_PUBLIC_API_TARGET=http://127.0.0.1:25774
-```
+~~~
 
-Adjust the URL to point to your Komari backend instance.
+<code>NEXT_PUBLIC_API_TARGET</code> is the backend base URL. Floe uses it for <code>/api/*</code> and <code>/themes/*</code> during development and local preview.
 
-### Run in development
+### Run the development server
 
-```bash
+~~~bash
 npm run dev
-```
+~~~
 
-Then open `http://localhost:3000` in your browser.
+Open <code>http://localhost:3000</code>. The Next.js development server rewrites the API and theme paths to <code>NEXT_PUBLIC_API_TARGET</code>.
 
-### Build for production / theme packaging
+These Next.js rewrites are development-only. The production build is a static export and does not include server-side rewrites.
 
-This project is configured for static export (`output: "export"` in `next.config.ts`), with the build output written to `dist/`.
+### Preview a production build
 
-```bash
+~~~bash
 npm run build
-```
+npm run preview
+~~~
 
-After the build completes:
+<code>npm start</code> is an equivalent entry point for the local preview server. The build is a static export written to <code>dist/</code>; the preview server serves that directory and proxies <code>/api</code>, <code>/themes</code> and their WebSocket upgrades to the configured Komari backend. Set <code>PORT</code> to use another local port:
 
-- Serve the `dist` directory with any static web server, **or**
-- Use the contents of `dist` as part of a Komari theme bundle.
+~~~bash
+PORT=3001 npm run preview
+~~~
 
-## Nginx Production Optimization Tips
+### Build the release package
 
-If you use Nginx or OpenResty as a reverse proxy, consider the following configuration to improve performance and avoid 404 responses for `HEAD` requests.
+~~~bash
+bash build-theme.sh
+~~~
 
-### 1. Handle HEAD requests (recommended)
+The packaging script installs dependencies, builds the static site, validates <code>komari-theme.json</code>, checks the package contents and writes <code>dist-release.zip</code>. It requires <code>node</code>, <code>npm</code>, <code>jq</code>, <code>zip</code> and <code>unzip</code>.
 
-Next.js prefetching and some CDNs, such as Tencent Cloud EdgeOne, may send frequent HTTP `HEAD` requests. Because the backend may not fully handle `HEAD`, you can convert those requests to `GET` at the Nginx layer before proxying them upstream:
+## Theme settings and integrations
 
-```nginx
-location / {
-    # Convert HEAD to GET before proxying upstream to avoid prefetch 404s.
-    if ($request_method = "HEAD") {
-        rewrite_by_lua_block { ngx.req.set_method(ngx.HTTP_GET) } # OpenResty option
-        # Or use: proxy_method GET; (pay attention to directive placement)
-    }
+### Local preferences and administrator defaults
 
-    proxy_pass http://127.0.0.1:25774;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-}
-```
+Visitors can use Floe's theme customizer to change presentation settings for their own browser. These preferences are stored locally.
 
-### 2. Enable Gzip compression
+Administrators can use Floe's native theme settings form in the Komari administrator dashboard to publish shared defaults for the instance. The form includes:
 
-Gzip can significantly improve the loading speed of Next.js static assets:
+- Logo URL, default appearance and default language.
+- Color, layout, card, graph, background and status-card settings.
+- Guest-facing price and expiration visibility.
+- Uptime Kuma configuration.
+- Scheduled announcement management.
 
-```nginx
-gzip on;
-gzip_proxied any;
-gzip_types text/plain text/css application/json application/javascript text/xml;
-gzip_vary on;
-```
-
-### 3. Security hardening
-
-Consider using `fail2ban` to monitor Nginx logs and block large-scale malicious scans against paths such as `/api/rpc2` or `/instance/`.
-
-These settings can improve navigation smoothness, make deployments more compatible with CDNs such as EdgeOne and Cloudflare, and reduce invalid 404 noise in browser consoles and Nginx logs.
-
-## Theme Development
+Only Komari administrators can edit shared settings.
 
 ### Scheduled announcements
 
-Sign in on the frontend and open Theme settings → Announcement management. Komari opens Floe's custom settings panel inside the admin content area. Floe provides a date/time picker, live preview and a Disable now button; the settings are saved as shared theme configuration for all visitors. This embedded Theme Settings page requires Komari 1.2.1 or newer.
+Announcements are shared theme settings displayed below the navigation bar on the dashboard and instance pages. They support Markdown headings, lists, links, code and tables; raw HTML and images are disabled.
 
-The announcement stays pinned below navigation on the dashboard and instance pages as a separate glass island. Long content scrolls inside the banner. Headings, lists, links, code and tables are supported; HTML and images are disabled. Choose one of the four supported text colors: white, green, yellow or red. The banner hides at expiry while retaining its configuration. Empty content and invalid schedules remain hidden.
+Administrators can enter the announcement content, start time, end time and text color. Start and end times use <code>YYYY-MM-DD HH:mm</code>, for example <code>2026-09-15 18:00</code>, interpreted using the site's UTC+08:00 convention; existing timestamps with an explicit timezone remain compatible. Empty content, invalid schedules and expired announcements remain hidden. Open pages refresh the announcement configuration approximately every 30 seconds.
 
-Open pages sync settings every 30 seconds, subject to network latency. Scheduling relies on the visitor device clock. This banner does not replace a separately hosted maintenance page during a full site outage.
+### Uptime Kuma
 
-This repository is designed to be used as a custom Komari theme.
+Configure a public Uptime Kuma status page with its base URL and status-page slug. When enabled, Floe shows grouped services, operational state, heartbeat history, latest ping, 24-hour uptime and a link back to the status page.
 
-1. Configure and customize the UI as needed.
-2. Edit `komari-theme.json` to match your theme’s metadata and settings.
-3. Build the project:
+## Deployment notes
 
-   ```bash
-   npm run build
-   ```
+- Floe is a static frontend. In production, serve it through Komari's same-origin theme entry or a correctly configured reverse proxy such as Nginx or Caddy; the exported site does not contain Next.js rewrites.
+- Reverse proxies should forward <code>/api/*</code> and <code>/themes/*</code> to Komari and preserve WebSocket upgrades for <code>/api/rpc2</code>. The local <code>npm run preview</code> server provides the equivalent proxy for static-build checks.
+- If a CDN or proxy sends <code>HEAD</code> requests that the backend answers with <code>404</code>, normalize those requests at the proxy or update the backend handling.
+- Enable gzip or Brotli compression for static JavaScript, CSS and JSON assets where appropriate.
+- Same-origin Floe tabs coordinate settings writes with Web Locks when the browser supports them. This does not coordinate different browsers, devices or other admin clients; avoid editing theme settings concurrently from multiple devices because Komari 1.2.1 does not provide a compare-and-swap version check.
 
-4. The static assets will be generated in the `dist` directory.  
-   Combine them with `komari-theme.json` as required by Komari’s theme system and package them according to the Komari documentation.
+## Commands
 
-## Scripts
+| Command | Purpose |
+| --- | --- |
+| <code>npm run dev</code> | Start the Next.js development server. |
+| <code>npm run build</code> | Create the static export in <code>dist/</code>. |
+| <code>npm run preview</code> / <code>npm start</code> | Serve <code>dist/</code> locally and proxy backend paths. |
+| <code>npm run lint</code> | Run ESLint over <code>src/</code>. |
+| <code>npm test</code> | Run the Node.js regression and security tests. |
+| <code>npm run lint:workflows</code> | Validate GitHub Actions workflows. |
+| <code>npm run i18n:validate</code> | Validate locale structure and placeholders. |
+| <code>npm run i18n:check</code> | Require translations and the source snapshot to be synchronized. |
+| <code>npm run i18n:sync:dry</code> | Preview translation changes without writing files or calling an API. |
+| <code>npm run i18n:sync</code> | Generate and validate translation updates. |
+| <code>bash build-theme.sh</code> | Build and verify <code>dist-release.zip</code>. |
 
-- `npm run dev` – Start the Next.js development server
-- `npm run build` – Build the static site into `dist/`
-- `npm run lint` – Run ESLint over the project
+## Repository layout
+
+| Path | Role |
+| --- | --- |
+| <code>src/app/page.tsx</code> | Client-side routing for the dashboard and <code>/instance/&lt;uuid&gt;</code>. |
+| <code>src/components/</code> | Dashboard, node, instance, settings and shared UI components. |
+| <code>src/contexts/</code> and <code>src/lib/</code> | Live data, RPC2, theme settings, announcements and integration logic. |
+| <code>src/i18n/locales/</code> | English, Simplified Chinese and Traditional Chinese translations. |
+| <code>script/</code> | Preview server, tests, localization tools and build-time checks. |
+| <code>komari-theme.json</code> | Komari theme metadata and native settings-form configuration. |
+| <code>build-theme.sh</code> | Reproducible local theme-package build and validation. |
+
+## CI and releases
+
+The GitHub Actions build workflow runs locale validation, workflow checks, linting, tests, static export, theme metadata validation and ZIP verification for pull requests, <code>main</code> and version tags. Tags using the <code>vMAJOR.MINOR.PATCH</code> format publish the verified <code>dist-release.zip</code> package.
+
+The translation workflow creates a reviewable pull request when source locale changes require synchronization. See [CI maintenance notes](./docs/ci-maintenance.md) for the repository's automation and release policies.
 
 ## Contributing
 
-Contributions are welcome.  
-If you find issues or have ideas for improvements, feel free to open an issue or submit a pull request.
+Issues and pull requests are welcome. Before submitting a change, run the checks relevant to your work, especially:
 
-## Source and acknowledgements
+~~~bash
+npm run lint
+npm test
+npm run build
+~~~
 
-Floe is an independently maintained third-party Komari theme. Part of its codebase is based on [Komari Next](https://github.com/tonyliuzj/komari-next), in tribute to its original author, Tony Liu. The UI, interaction details and future development of Floe are maintained independently by 豕豕豕. This project is not an official Komari or Komari Next release and does not represent either project's endorsement.
+When changing user-facing strings, also run the locale validation or synchronization commands. Keep <code>README.md</code> and <code>README-CN.md</code> aligned when changing user-facing project information.
 
-[Komari Next](https://github.com/tonyliuzj/komari-next) provided the initial technical foundation.
-[piphase/komari-nexus](https://github.com/piphase/komari-nexus)
-[fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro)
-[Contributors](https://github.com/lliooly/komari-theme-floe/graphs/contributors)
+## Acknowledgements
+
+Floe is independently maintained by 豕豕豕. Its initial technical foundation was partly based on [Komari Next](https://github.com/tonyliuzj/komari-next). Thanks also to:
+
+- [piphase/komari-nexus](https://github.com/piphase/komari-nexus)
+- [fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro)
+- [Floe contributors](https://github.com/lliooly/komari-theme-floe/graphs/contributors)
 
 ## License
 
@@ -187,27 +203,9 @@ Floe is released under the MIT License. The original copyright and license notic
 ## Star History
 
 <a href="https://www.star-history.com/?repos=lliooly%2Fkomari-theme-floe&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
- </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
+  </picture>
 </a>
-
-
-## Local preview and settings concurrency
-
-Run `npm run build`, then `npm run preview` (or `npm start`). The preview listens on
-`http://127.0.0.1:3000`, serves `dist`, and forwards `/api` and `/themes` (including
-WebSockets) to `NEXT_PUBLIC_API_TARGET` in `.env.local`, defaulting to
-`http://127.0.0.1:25774`. Use `PORT` to change the preview port.
-
-Settings writes have request timeouts and use Web Locks, where supported, to
-serialize cooperating Floe tabs and embedded settings on the same origin.
-Only edited fields are merged into the latest server settings. Failed theme
-edits remain queued in the current page and the error notification offers a retry;
-reload discards unsaved edits. Browsers without Web Locks only serialize writes
-within each page. Different browsers/devices and other admin clients cannot share
-this lock: Komari 1.2.1's settings API has no compare-and-swap/version precondition,
-so concurrent writes from those clients still require a backend change for an
-atomic guarantee. Avoid simultaneous editing from multiple devices.

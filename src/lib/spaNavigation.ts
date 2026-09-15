@@ -10,6 +10,14 @@ export function getCurrentSpaPathname(): string {
   return window.location.pathname || "/";
 }
 
+export function isMonitorRoute(pathname: string): boolean {
+  const normalizedPathname = pathname.replace(/\/+$/, "") || "/";
+  if (normalizedPathname === "/") return true;
+
+  const parts = normalizedPathname.split("/").filter(Boolean);
+  return parts[0] === "instance" && Boolean(parts[1]);
+}
+
 export function navigateSpa(
   href: string,
   options: { replace?: boolean; scrollToTop?: boolean } = {}

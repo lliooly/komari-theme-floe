@@ -27,7 +27,8 @@ manifest_version="$(jq -r '.version // empty' komari-theme.json)"
 manifest_short="$(jq -r '.short // empty' komari-theme.json)"
 manifest_url="$(jq -r '.url // empty' komari-theme.json)"
 manifest_configuration_type="$(jq -r '.configuration.type // empty' komari-theme.json)"
-manifest_configuration_data="$(jq -r '.configuration.data // empty' komari-theme.json)"
+manifest_configuration_fields="$(jq -r '.configuration.fields | length' komari-theme.json)"
+manifest_configuration_managed_fields="$(jq -r '.configuration.managedFields | length' komari-theme.json)"
 
 [[ "$manifest_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
   echo "Error: komari-theme.json version must be MAJOR.MINOR.PATCH" >&2
@@ -35,8 +36,12 @@ manifest_configuration_data="$(jq -r '.configuration.data // empty' komari-theme
 }
 test "$manifest_short" = "floe"
 test "$manifest_url" = "https://github.com/lliooly/komari-theme-floe"
-test "$manifest_configuration_type" = "raw"
-grep -Fq '/settings?embedded=1' <<<"$manifest_configuration_data"
+test -z "$manifest_configuration_type"
+test "$manifest_configuration_fields" -gt 0
+test "$manifest_configuration_managed_fields" -gt 0
+! grep -Fq 'settings?embedded=1' komari-theme.json
+jq -e '.configuration.fields | any(.key == "announcement.startsAt")' komari-theme.json >/dev/null
+jq -e '.configuration.fields | any(.key == "announcement.endsAt")' komari-theme.json >/dev/null
 
 package_dir="$(mktemp -d "${TMPDIR:-/tmp}/floe-theme.XXXXXX")"
 trap 'rm -rf "$package_dir"' EXIT

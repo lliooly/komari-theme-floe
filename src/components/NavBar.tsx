@@ -11,6 +11,7 @@ import { usePublicInfo } from "@/contexts/PublicInfoContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { dispatchOpenRemainingValueCalculatorEvent } from "@/lib/remainingValueEvents";
+import { isMonitorRoute } from "@/lib/spaNavigation";
 import { useEffect, useState } from "react";
 import { useSpaPathname } from "@/hooks/useSpaPathname";
 
@@ -72,7 +73,7 @@ const NavBar = () => {
   }, []);
 
   const showCustomLogo = Boolean(logoUrl) && !logoLoadFailed;
-  const isThemeSettingsPage = pathname.replace(/\/+$/, "").endsWith("/settings");
+  const isMonitorPage = isMonitorRoute(pathname);
 
   return (
     <nav className="w-full rounded-2xl border-0 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 shadow-sm transition-all duration-300 motion-reduce:transition-none">
@@ -123,11 +124,11 @@ const NavBar = () => {
         <div
           className={`flex items-center transition-all duration-300 motion-reduce:transition-none ${
             isCompact ? "gap-1" : "gap-2"
-          }`}
+        }`}
         >
           <DarkModeToggle />
-          {!isThemeSettingsPage && <ThemeSwitcher />}
-          {guestDisplay.showPrice && guestDisplay.showExpiredAt && (
+          <ThemeSwitcher />
+          {isMonitorPage && guestDisplay.showPrice && guestDisplay.showExpiredAt && (
             <Button
               type="button"
               variant="ghost"

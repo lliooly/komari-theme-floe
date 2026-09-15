@@ -20,7 +20,7 @@ test("preview serves SPA routes, proxies API requests and rejects unsafe files",
     preview = createPreviewServer({ directory: dir, target: `http://127.0.0.1:${backend.address().port}` });
     preview.listen(0, "127.0.0.1"); await once(preview, "listening");
     const base = `http://127.0.0.1:${preview.address().port}`;
-    for (const path of ["/", "/settings?embedded=1", "/instance/test-node"]) {
+    for (const path of ["/", "/instance/test-node"]) {
       const response = await fetch(base + path);
       assert.equal(response.status, 200);
       assert.equal(await response.text(), "<h1>Floe</h1>");

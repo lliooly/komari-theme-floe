@@ -1,183 +1,200 @@
 # Floe
 
-Floe 是一个独立维护的 Komari 第三方主题。
-它基于 **Next.js**、**TypeScript**、**Tailwind CSS** 和 **Shadcn UI** 构建，并打包为可作为 Komari 主题使用的静态站点。
+[![Build and Release Floe Theme](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml)
+[![MIT License](https://img.shields.io/github/license/lliooly/komari-theme-floe)](./LICENSE)
 
 [English](./README.md)
 
-[演示站点](https://probes.top)
+[演示站点](https://komari.probe.name) · [下载最新主题包](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip) · [查看全部版本](https://github.com/lliooly/komari-theme-floe/releases)
 
-[下载主题文件](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip)
+Floe 是一个独立维护的 [Komari](https://github.com/komari-monitor/komari) 第三方主题。它是一个静态导出的 [Next.js](https://nextjs.org/) 前端，通过正在运行的 Komari 后端读取实时数据，也可以作为 ZIP 主题包通过 Komari 的主题管理器安装。
 
-> 本仓库仅包含前端部分。你需要一个正在运行的 Komari 后端实例供该 UI 调用。或者，你也可以下载主题文件，并通过 Komari 管理后台上传；这是推荐的使用方式。
+> Floe 不是 Komari 或 Komari Next 的官方发布版本，也不代表任一项目的官方背书。
 
-![预览](https://github.com/lliooly/komari-theme-floe/blob/main/preview.png?raw=true)
-![深色主题](https://github.com/lliooly/komari-theme-floe/blob/main/images/dark-theme.png?raw=true)
+![Floe 预览](https://github.com/lliooly/komari-theme-floe/blob/main/preview.png?raw=true)
+
+![Floe 深色主题预览](https://github.com/lliooly/komari-theme-floe/blob/main/images/dark-theme.png?raw=true)
 
 ## 功能特性
 
-* 服务器与节点状态的实时仪表盘
-* 实例详情页，包含负载与延迟图表
-* 节点列表与管理视图
-* 基于 `react-i18next` 的国际化（i18n）
-* 使用 Shadcn + Tailwind CSS 的响应式布局与深色模式
-* 适配 Komari 主题系统的主题打包方案
-* **丰富的自定义选项：**
+### 监控体验
 
-  * **6 种配色主题：** Default、Ocean、Sunset、Forest、Midnight、Rose
-  * **4 种卡片布局：** Classic、Modern、Minimal、Detailed —— 每种都有独特的视觉设计与元素布局
-  * **4 种图表样式：** Circle、Progress Bar、Bar Chart、Minimal —— 均会跟随所选配色主题
-  * **可自定义状态卡片：** 可在仪表盘中显示/隐藏单项指标
-  * **自带背景图！** 使用图片 URL 将其设置为背景。
-  * **背景模糊：** 可为自定义背景图启用 Soft 或 Glass 模糊效果，并调整模糊强度。
-  * **卡片模糊：** 可启用 Soft 或 Glass 卡片背景，分别调整卡片透明强度与额外模糊强度。
-  * 内嵌主题设置页不渲染页面级背景，同时与主页共用同一套卡片背景和毛玻璃系统。
-  * **Ping 统计显示** 在首页即可直接展示数据包信息！
-  * 所有设置会在本地持久化保存，并可在主题切换时同步
+- 实时仪表盘，定期刷新数据。
+- 当前时间、在线节点、地区、流量和网络速度等汇总卡片。
+- 节点世界地图。
+- 节点浏览器，支持搜索、分组筛选、在线 / 离线状态，以及网格或表格视图。
+- <code>/instance/&lt;uuid&gt;</code> 实例详情页，提供负载和延迟图表。
+- 可选的 Uptime Kuma 状态面板，展示服务分组、状态徽章、心跳历史、最新延迟和 24 小时可用率。
+- 剩余价值计算器，适用于后端提供价格和到期时间数据的部署。
+- 响应式布局、深色模式、减少动态效果支持和多语言界面。
 
-## 技术栈
+### 个性化配置
 
-* **框架：** Next.js（App Router，静态导出）
-* **语言：** TypeScript、React
-* **UI：** Shadcn UI + Radix UI primitives、Tailwind CSS v4
-* **图表：** Recharts
-* **状态 / 数据：** 自定义 Context、RPC2 客户端、基于 fetch 的 API
+- 6 种颜色主题：Default、Ocean、Sunset、Forest、Midnight 和 Rose。
+- 5 种卡片布局：Classic、Modern、Minimal、Detailed 和 Compact。
+- 可选卡片和状态设计，包括延迟历史块与速度仪表。
+- 4 种图表设计：Circle、Progress Bar、Bar Chart 和 Minimal。
+- 自定义背景图片，并支持蒙版、轻柔模糊和玻璃模糊。
+- 卡片背景透明度和模糊控制。
+- 单独控制状态卡片、内存 / 磁盘总量、游客价格和到期时间的显示。
+- 节点网格 / 表格偏好、自定义 Logo URL，以及浅色 / 深色 / 跟随系统外观。
+- English、简体中文和繁体中文界面。
+- 支持访客本地偏好，也支持管理员为整个 Komari 实例发布共享默认配置。
 
 ## 前置要求
 
-* **Node.js** 22 或更高版本（推荐使用 LTS）
-* 一个可从浏览器访问的 **Komari 后端**（API）
-* **Komari 1.2.1 或更高版本**，用于支持 Floe 内嵌式主题设置页
+- Node.js 22 或更高版本，用于本地开发和主题打包。
+- 一个可从浏览器访问 API 的 Komari 后端实例。
+- Komari 1.0.5 或更高版本，用于支持主题原生设置表单。
 
-## 快速开始
+## 安装 Floe
 
-* 直接 [下载主题文件](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip)，并通过 Komari 管理后台上传，这是推荐方式。
+推荐使用预构建的主题包安装：
 
-## 开发
+1. [下载最新的 <code>dist-release.zip</code>](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip)。
+2. 打开 Komari 管理后台，进入主题管理。
+3. 上传 ZIP 主题包并启用 Floe。
 
-克隆本仓库并安装依赖：
+发布包包含 <code>komari-theme.json</code>、<code>preview.png</code> 和静态 <code>dist/</code> 目录。请上传发布包，不要直接上传源代码仓库。
 
-```bash
-npm install
-```
+## 本地开发
 
-### 配置 API 目标地址
+克隆仓库并安装锁定版本的依赖：
 
-前端通过 `next.config.ts` 中配置的 `/api/*` rewrites 与 Komari 后端通信。
-使用 `NEXT_PUBLIC_API_TARGET` 设置后端基础地址：
+~~~bash
+git clone https://github.com/lliooly/komari-theme-floe.git
+cd komari-theme-floe
+npm ci
+~~~
 
-在项目根目录创建 `.env.local` 文件：
+### 配置 Komari API
 
-```env
+如果后端不是运行在默认地址，请在项目根目录创建 <code>.env.local</code>：
+
+~~~env
 NEXT_PUBLIC_API_TARGET=http://127.0.0.1:25774
-```
+~~~
 
-请根据你的 Komari 后端实例调整该 URL。
+<code>NEXT_PUBLIC_API_TARGET</code> 应填写后端基础 URL。Floe 会在开发和本地预览时使用它代理 <code>/api/*</code> 和 <code>/themes/*</code>。
 
-### 本地开发运行
+### 启动开发服务器
 
-```bash
+~~~bash
 npm run dev
-```
+~~~
 
-然后在浏览器中打开 `http://localhost:3000`。
+打开 <code>http://localhost:3000</code>。Next.js 开发服务器会将 API 和主题路径重写到 <code>NEXT_PUBLIC_API_TARGET</code>。
 
-### 生产构建 / 主题打包
+这些 Next.js rewrites 仅在开发环境启用。生产构建是静态导出，不包含服务端 rewrites。
 
-本项目已配置为静态导出（`next.config.ts` 中的 `output: "export"`），构建产物会输出到 `dist/`。
+### 预览生产构建
 
-```bash
+~~~bash
 npm run build
-```
+npm run preview
+~~~
 
-构建完成后：
+<code>npm start</code> 与本地预览服务器使用同一个入口。构建结果是输出到 <code>dist/</code> 的静态站点；预览服务器会托管该目录，并将 <code>/api</code>、<code>/themes</code> 及其 WebSocket 升级请求代理到配置的 Komari 后端。可以通过 <code>PORT</code> 修改本地端口：
 
-* 使用任意静态 Web 服务器托管 `dist` 目录，**或**
-* 将 `dist` 内容作为 Komari 主题包的一部分使用。
+~~~bash
+PORT=3001 npm run preview
+~~~
 
-## Nginx 生产环境优化建议
+### 构建发布包
 
-如果你使用 Nginx 或 OpenResty 作为反向代理，建议参考以下配置以优化性能，并解决 `HEAD` 请求返回 404 的问题。
+~~~bash
+bash build-theme.sh
+~~~
 
-### 1. 处理 HEAD 请求（推荐）
+打包脚本会安装依赖、构建静态站点、校验 <code>komari-theme.json</code>、检查 ZIP 内容，并生成 <code>dist-release.zip</code>。该脚本需要 <code>node</code>、<code>npm</code>、<code>jq</code>、<code>zip</code> 和 <code>unzip</code>。
 
-Next.js 的预取（Prefetching）机制和部分 CDN（如腾讯云 EdgeOne）可能会频繁发起 HTTP `HEAD` 请求。由于后端目前可能未对 `HEAD` 方法进行完整处理，建议在 Nginx 层将其转换为 `GET` 请求回源，以确保预取功能正常：
+## 主题设置与集成
 
-```nginx
-location / {
-    # 将 HEAD 转换为 GET 发往后端，解决预取 404
-    if ($request_method = "HEAD") {
-        rewrite_by_lua_block { ngx.req.set_method(ngx.HTTP_GET) } # OpenResty 方案
-        # 或者使用：proxy_method GET;（需注意配置位置）
-    }
+### 访客本地偏好与管理员默认配置
 
-    proxy_pass http://127.0.0.1:25774;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-}
-```
+访客可以使用 Floe 的主题自定义器，为自己的浏览器调整显示效果；这些偏好保存在本地。
 
-### 2. 开启 Gzip 压缩
+管理员可以直接在 Komari 管理后台的 Floe 主题设置表单中，为当前实例发布共享默认配置。表单包括：
 
-可显著提升 Next.js 静态资源的加载速度：
+- Logo URL、默认外观和默认语言。
+- 颜色、布局、卡片、图表、背景和状态卡片设置。
+- 面向游客的价格和到期时间显示。
+- Uptime Kuma 配置。
+- 定时公告管理。
 
-```nginx
-gzip on;
-gzip_proxied any;
-gzip_types text/plain text/css application/json application/javascript text/xml;
-gzip_vary on;
-```
-
-### 3. 安全防护建议
-
-建议配合 `fail2ban` 监控 Nginx 日志，防止僵尸网络对 `/api/rpc2` 或 `/instance/` 等路径进行大规模恶意扫描。
-
-这些配置可以改善页面跳转体验，提升套用 EdgeOne、Cloudflare 等 CDN 后的兼容性，并减少控制台和 Nginx 日志中的无效 404 报警。
-
-## 主题开发
+只有 Komari 管理员可以编辑共享设置。
 
 ### 定时公告
 
-登录前台后，打开导航栏的主题设置 → 公告管理。Komari 会在管理后台的主内容区域内嵌打开 Floe 的自定义设置面板。Floe 自带日期时间选择器、即时预览和“立即关闭”按钮，保存后会作为所有访客共用的主题配置。这个内嵌式主题设置页需要 Komari 1.2.1 或更高版本。
+公告属于共享主题配置，会显示在仪表盘和实例详情页导航栏下方。公告支持 Markdown 标题、列表、链接、代码和表格；原始 HTML 和图片会被禁用。
 
-公告在设定时段内与导航栏共同置顶，并作为导航栏下方独立的毛玻璃岛展示；首页和节点详情页都可见，长内容在横幅内部滚动。支持标题、列表、链接、代码和表格，禁用 HTML 和图片。文字颜色仅支持白色、绿色、黄色和红色。结束时间到达后自动隐藏，配置保留供后续修改。过期、内容为空或时间无效时不展示。
+管理员可以填写公告内容、开始时间、结束时间和文字颜色。开始时间和结束时间使用 <code>YYYY-MM-DD HH:mm</code>，例如 <code>2026-09-15 18:00</code>，按站点约定的 UTC+08:00 解析；已有带时区的 ISO 时间仍然兼容。内容为空、时间无效或已过期的公告不会显示。已打开的页面大约每 30 秒同步一次公告配置。
 
-已打开的页面每 30 秒同步一次配置，实际同步时间受网络影响；定时判断依赖访客设备时钟。主题横幅不能替代整站离线时的独立维护页。
+### Uptime Kuma
 
-本仓库设计为可作为自定义 Komari 主题使用。
+在主题设置中填写公开的 Uptime Kuma 状态页基础 URL 和 slug。启用后，Floe 会展示服务分组、运行状态、心跳历史、最新延迟、24 小时可用率，以及返回状态页的链接。
 
-1. 根据需要配置并自定义 UI。
-2. 编辑 `komari-theme.json`，匹配你的主题元数据和设置项。
-3. 构建项目：
+## 部署说明
 
-   ```bash
-   npm run build
-   ```
+- Floe 是静态前端。生产环境应通过 Komari 的同源主题入口，或通过 Nginx、Caddy 等正确配置的反向代理托管；静态导出结果不包含 Next.js rewrites。
+- 反向代理应将 <code>/api/*</code> 和 <code>/themes/*</code> 转发到 Komari，并为 <code>/api/rpc2</code> 保留 WebSocket 升级。本地静态构建检查可使用 <code>npm run preview</code>，该服务器会提供等效代理。
+- 如果 CDN 或代理发送的 <code>HEAD</code> 请求被后端返回 <code>404</code>，请在代理层规范化请求，或修复后端对 <code>HEAD</code> 的处理。
+- 建议为静态 JavaScript、CSS 和 JSON 资源启用 Gzip 或 Brotli 压缩。
+- 浏览器支持时，同源 Floe 页面会使用 Web Locks 协调设置保存。它不会协调不同浏览器、设备或其他管理客户端；由于 Komari 1.2.1 没有提供 compare-and-swap 版本检查，请避免在多个设备上同时编辑主题设置。
 
-4. 静态资源会生成到 `dist` 目录。
-   按照 Komari 主题系统要求，将其与 `komari-theme.json` 组合，并根据 Komari 文档进行打包。
+## 常用命令
 
-## 脚本
+| 命令 | 用途 |
+| --- | --- |
+| <code>npm run dev</code> | 启动 Next.js 开发服务器。 |
+| <code>npm run build</code> | 在 <code>dist/</code> 中生成静态站点。 |
+| <code>npm run preview</code> / <code>npm start</code> | 本地托管 <code>dist/</code> 并代理后端路径。 |
+| <code>npm run lint</code> | 对 <code>src/</code> 运行 ESLint。 |
+| <code>npm test</code> | 运行 Node.js 回归测试和安全测试。 |
+| <code>npm run lint:workflows</code> | 校验 GitHub Actions 工作流。 |
+| <code>npm run i18n:validate</code> | 校验语言文件结构和占位符。 |
+| <code>npm run i18n:check</code> | 要求翻译文件和源文案快照保持同步。 |
+| <code>npm run i18n:sync:dry</code> | 预览翻译变化，不写文件、不调用 API。 |
+| <code>npm run i18n:sync</code> | 生成并校验翻译更新。 |
+| <code>bash build-theme.sh</code> | 构建并校验 <code>dist-release.zip</code>。 |
 
-* `npm run dev` - 启动 Next.js 开发服务器
-* `npm run build` - 将静态站点构建到 `dist/`
-* `npm run lint` - 对项目运行 ESLint
+## 仓库结构
 
-## 贡献
+| 路径 | 作用 |
+| --- | --- |
+| <code>src/app/page.tsx</code> | 处理仪表盘和 <code>/instance/&lt;uuid&gt;</code> 的客户端路由。 |
+| <code>src/components/</code> | 仪表盘、节点、实例、设置和通用 UI 组件。 |
+| <code>src/contexts/</code> 和 <code>src/lib/</code> | 实时数据、RPC2、主题设置、公告和集成逻辑。 |
+| <code>src/i18n/locales/</code> | English、简体中文和繁体中文翻译。 |
+| <code>script/</code> | 本地预览服务器、测试、本地化工具和构建检查。 |
+| <code>komari-theme.json</code> | Komari 主题元数据和原生设置表单配置。 |
+| <code>build-theme.sh</code> | 可复现的本地主题包构建和校验脚本。 |
 
-欢迎贡献。
-如果你发现问题或有改进建议，欢迎提交 issue 或 pull request。
+## CI 与发布
+
+GitHub Actions 构建工作流会在 Pull Request、<code>main</code> 分支和版本标签上运行语言文件校验、工作流检查、Lint、测试、静态导出、主题元数据校验和 ZIP 校验。使用 <code>vMAJOR.MINOR.PATCH</code> 格式的标签会发布经过校验的 <code>dist-release.zip</code>。
+
+当源语言文件发生需要同步的变化时，翻译工作流会创建可供人工审阅的 Pull Request。详细的自动化和发布策略请参阅 [CI 维护说明](./docs/ci-maintenance.md)。
+
+## 参与贡献
+
+欢迎提交 Issue 和 Pull Request。提交变更前，请至少运行与你的修改相关的检查，尤其是：
+
+~~~bash
+npm run lint
+npm test
+npm run build
+~~~
+
+修改用户可见文案时，也请运行语言文件校验或同步命令。涉及项目说明时，请保持 <code>README.md</code> 和 <code>README-CN.md</code> 的内容同步。
 
 ## 来源与致谢
 
-Floe 是独立维护的 Komari 第三方主题，部分代码源自 [Komari Next](https://github.com/tonyliuzj/komari-next)，以此向原作者 Tony Liu 致敬。Floe 的 UI、交互细节和后续开发由豕豕豕独立维护。本项目不是 Komari 或 Komari Next 的官方发布版本，也不代表其官方背书。
+Floe 由豕豕豕独立维护，早期技术基础部分来自 [Komari Next](https://github.com/tonyliuzj/komari-next)。同时感谢：
 
-感谢以下项目提供参考和启发：
-
-* [Komari Next](https://github.com/tonyliuzj/komari-next)
-* [piphase/komari-nexus](https://github.com/piphase/komari-nexus)
-* [fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro)
+- [piphase/komari-nexus](https://github.com/piphase/komari-nexus)
+- [fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro)
+- [Floe 贡献者](https://github.com/lliooly/komari-theme-floe/graphs/contributors)
 
 ## 许可证
 
@@ -186,23 +203,9 @@ Floe 使用 MIT License，原有版权和许可证声明保留在 [LICENSE](./LI
 ## Star History
 
 <a href="https://www.star-history.com/?repos=lliooly%2Fkomari-theme-floe&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
- </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lliooly/komari-theme-floe&type=date&legend=top-left" />
+  </picture>
 </a>
-
-
-## 本地预览与设置并发保存
-
-执行 `npm run build` 后，使用 `npm run preview` 或 `npm start`。预览服务监听
-`http://127.0.0.1:3000`，提供 `dist` 静态文件，并将 `/api`、`/themes`（含 WebSocket）
-代理到 `.env.local` 的 `NEXT_PUBLIC_API_TARGET`，默认 `http://127.0.0.1:25774`。
-可通过 `PORT` 修改端口。
-
-设置请求有超时限制；支持 Web Locks 的浏览器会串行处理同源 Floe 页面和内嵌设置页的保存，
-并仅将本次编辑字段合并到最新服务器配置。主题保存失败时，修改保留在当前页面队列中，
-错误通知提供重试按钮；刷新页面会丢弃未保存修改。不支持 Web Locks 时，仅保证当前页面内串行。
-不同浏览器、设备或其他管理客户端不共享此锁；Komari 1.2.1 设置接口没有版本条件检查，
-要彻底保证这类并发写入的原子性，需要后端支持。请避免在多个设备上同时编辑设置。

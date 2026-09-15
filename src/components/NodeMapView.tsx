@@ -19,7 +19,7 @@ import { getRevealProps } from "@/lib/reveal";
 
 import "./NodeMapView.css";
 
-interface NodeMapViewProps {
+export interface NodeMapViewProps {
   nodes: NodeBasicInfo[];
   liveData: LiveData;
   mapOnly?: boolean;

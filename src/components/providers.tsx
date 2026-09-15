@@ -6,8 +6,6 @@ import { ThemeProvider } from "@/contexts/ThemeContext"
 import { AnnouncementProvider } from "@/contexts/AnnouncementContext"
 import { RPC2Provider } from "@/contexts/RPC2Context"
 import { PublicInfoProvider } from "@/contexts/PublicInfoContext"
-import { NodeListProvider } from "@/contexts/NodeListContext"
-import { LiveDataProvider } from "@/contexts/LiveDataContext"
 import { Toaster } from "@/components/ui/sonner"
 import { OfflineIndicator } from "@/components/OfflineIndicator"
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt"
@@ -38,15 +36,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AnnouncementProvider>
           <RPC2Provider>
             <PublicInfoProvider>
-              <NodeListProvider>
-                <LiveDataProvider>
-                  {children}
-                  <Toaster />
-                  <OfflineIndicator />
-                  <PWAInstallPrompt />
-                  <PWAUpdatePrompt />
-                </LiveDataProvider>
-              </NodeListProvider>
+              {children}
+              <Toaster />
+              <OfflineIndicator />
+              <PWAInstallPrompt />
+              <PWAUpdatePrompt />
             </PublicInfoProvider>
           </RPC2Provider>
         </AnnouncementProvider>

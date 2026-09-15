@@ -53,9 +53,47 @@ export function getAnnouncementTextColorClass(color: AnnouncementTextColor): str
   }[color];
 }
 
-// Require an explicit timezone so every visitor sees the same scheduled interval.
+const SHORT_ANNOUNCEMENT_TIME_PATTERN = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/;
+// Native Komari fields do not carry a timezone, so the short form uses the site's fixed convention.
+const DEFAULT_ANNOUNCEMENT_OFFSET = "+08:00";
+
+function isValidCalendarTime(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  second: number,
+) {
+  if (
+    month < 1 || month > 12 || day < 1 || day > 31 ||
+    hour < 0 || hour > 23 || minute < 0 || minute > 59 ||
+    second < 0 || second > 59
+  ) {
+    return false;
+  }
+
+  const calendar = new Date(Date.UTC(year, month - 1, day));
+  return calendar.getUTCFullYear() === year
+    && calendar.getUTCMonth() + 1 === month
+    && calendar.getUTCDate() === day;
+}
+
 export function announcementTime(value: string): number {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,3})?)?(Z|[+-](\d{2}):(\d{2}))$/);
+  const normalizedValue = value.trim();
+  const shortMatch = normalizedValue.match(SHORT_ANNOUNCEMENT_TIME_PATTERN);
+  if (shortMatch) {
+    const [, yearText, monthText, dayText, hourText, minuteText] = shortMatch;
+    const year = Number(yearText);
+    const month = Number(monthText);
+    const day = Number(dayText);
+    const hour = Number(hourText);
+    const minute = Number(minuteText);
+    if (!isValidCalendarTime(year, month, day, hour, minute, 0)) return NaN;
+    return Date.parse(`${yearText}-${monthText}-${dayText}T${hourText}:${minuteText}:00${DEFAULT_ANNOUNCEMENT_OFFSET}`);
+  }
+
+  const match = normalizedValue.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,3})?)?(Z|[+-](\d{2}):(\d{2}))$/);
   if (!match) return NaN;
   const [, yearText, monthText, dayText, hourText, minuteText, secondText, , offsetHourText, offsetMinuteText] = match;
   const year = Number(yearText);
@@ -66,10 +104,8 @@ export function announcementTime(value: string): number {
   const second = secondText ? Number(secondText) : 0;
   const offsetHour = offsetHourText ? Number(offsetHourText) : 0;
   const offsetMinute = offsetMinuteText ? Number(offsetMinuteText) : 0;
-  if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59 || offsetHour > 23 || offsetMinute > 59) return NaN;
-  const calendar = new Date(`${value.slice(0, 10)}T00:00:00Z`);
-  if (calendar.getUTCFullYear() !== year || calendar.getUTCMonth() + 1 !== month || calendar.getUTCDate() !== day) return NaN;
-  return Date.parse(value);
+  if (!isValidCalendarTime(year, month, day, hour, minute, second) || offsetHour > 23 || offsetMinute > 59) return NaN;
+  return Date.parse(normalizedValue);
 }
 
 export function announcementStatus(value: Announcement, now: number) {

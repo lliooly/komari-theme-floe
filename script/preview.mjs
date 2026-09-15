@@ -32,7 +32,7 @@ export function createPreviewServer({ directory = "dist", target = process.env.N
         res.writeHead(405, { Allow: "GET, HEAD" }).end();
         return;
       }
-      const isPage = pathname === "/" || /^\/settings\/?$/.test(pathname) || /^\/instance\/[^/]+\/?$/.test(pathname);
+      const isPage = pathname === "/" || /^\/instance\/[^/]+\/?$/.test(pathname);
       const file = resolve(root, isPage ? "index.html" : `.${pathname}`);
       if (!file.startsWith(root + sep) || pathname.split("/").some((part) => part.startsWith("."))) {
         res.writeHead(403).end();

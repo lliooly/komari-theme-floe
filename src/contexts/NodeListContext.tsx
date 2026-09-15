@@ -62,7 +62,7 @@ interface NodeListContextType {
   nodeList: NodeBasicInfo[] | null;
   isLoading: boolean;
   error: string | null;
-  refresh: () => void;
+  refresh: () => Promise<boolean>;
 }
 
 const NodeListContext = React.createContext<NodeListContextType | undefined>(
@@ -111,17 +111,28 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
   const { call } = useRPC2Call();
+  const requestVersionRef = React.useRef(0);
+  const inFlightRef = React.useRef<Promise<boolean> | null>(null);
+  const disposedRef = React.useRef(false);
 
-  const refresh = React.useCallback(() => {
-    // setIsLoading(true);
+  const refresh = React.useCallback((): Promise<boolean> => {
+    if (inFlightRef.current) return inFlightRef.current;
+
+    const requestVersion = ++requestVersionRef.current;
     setError(null);
+
     // 通过 RPC2 获取节点基本信息
-    call<{ uuid?: string }, Record<string, any>>("common:getNodes")
+    const request = call<{ uuid?: string }, Record<string, any>>("common:getNodes")
       .then((result) => {
+        if (disposedRef.current || requestVersion !== requestVersionRef.current) {
+          return false;
+        }
+
         if (!result || typeof result !== "object") {
           setNodeList([]);
-          return;
+          return true;
         }
+
         // 将 { [uuid]: Client } 转换为 NodeBasicInfo[]
         const list: NodeBasicInfo[] = Object.values(result).map((n: any) => ({
           uuid: n.uuid,
@@ -154,19 +165,47 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
           ipv6: n.ipv6,
         }));
         setNodeList(list);
+        return true;
       })
       .catch((err: any) => {
+        if (disposedRef.current || requestVersion !== requestVersionRef.current) {
+          return false;
+        }
+
         setError(err?.message || "An error occurred while fetching data");
         setNodeList([]);
+        return false;
       })
       .finally(() => {
-        setIsLoading(false);
+        if (inFlightRef.current === request) {
+          inFlightRef.current = null;
+        }
+        if (!disposedRef.current && requestVersion === requestVersionRef.current) {
+          setIsLoading(false);
+        }
       });
+
+    inFlightRef.current = request;
+    return request;
   }, [call]);
 
   React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- start the provider's initial async node fetch
-    refresh();
+    disposedRef.current = false;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden || document.visibilityState === "hidden") {
+        requestVersionRef.current += 1;
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    void refresh();
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      disposedRef.current = true;
+      requestVersionRef.current += 1;
+      inFlightRef.current = null;
+    };
   }, [refresh]);
 
   const contextValue = React.useMemo(

@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { LiveDataResponse } from "../types/LiveData";
 import { useRPC2Call } from "./RPC2Context";
+import { createVisibilityPoller } from "@/lib/polling";
 
 // 创建Context
 interface LiveDataContextType {
@@ -39,85 +40,70 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // 采用 RPC2 轮询最新状态，替代 WebSocket
   useEffect(() => {
-    // Skip during SSR/SSG
-    if (typeof window === 'undefined') return;
-    
-    let timer: number | undefined;
-    let stopped = false;
-    let running = false; // 防抖：避免并发请求
-    const intervalMs = 2000;
+    return createVisibilityPoller({
+      intervalMs: 2_000,
+      maxBackoffMs: 30_000,
+      poll: async ({ isCurrent }) => {
+        try {
+          // 策略由 RPC2Client 内部实现
+          const result: Record<string, any> = await call("common:getNodesLatestStatus");
+          if (!isCurrent()) return false;
 
-    const fetchLatest = async () => {
-      if (running) return; // 如果上次请求还在，跳过
-      running = true;
-      try {
-        // 策略由 RPC2Client 内部实现
-        const result: Record<string, any> = await call("common:getNodesLatestStatus");
-        if (stopped) return;
-        // 将返回转换为 LiveDataResponse 结构
-        const online = Object.values(result)
-          .filter((v: any) => v?.online)
-          .map((v: any) => v.client as string);
+          // 将返回转换为 LiveDataResponse 结构
+          const online = Object.values(result)
+            .filter((v: any) => v?.online)
+            .map((v: any) => v.client as string);
 
-        const dataMap: Record<string, any> = {};
-        for (const [uuid, v] of Object.entries(result)) {
-          const rec = v as any;
-          dataMap[uuid] = {
-            cpu: { usage: typeof rec.cpu === "number" ? rec.cpu : 0 },
-            ram: { used: rec.ram ?? 0 },
-            swap: { used: rec.swap ?? 0 },
-            load: {
-              load1: rec.load ?? 0,
-              load5: rec.load5 ?? 0,
-              load15: rec.load15 ?? 0,
+          const dataMap: Record<string, any> = {};
+          for (const [uuid, v] of Object.entries(result)) {
+            const rec = v as any;
+            dataMap[uuid] = {
+              cpu: { usage: typeof rec.cpu === "number" ? rec.cpu : 0 },
+              ram: { used: rec.ram ?? 0 },
+              swap: { used: rec.swap ?? 0 },
+              load: {
+                load1: rec.load ?? 0,
+                load5: rec.load5 ?? 0,
+                load15: rec.load15 ?? 0,
+              },
+              disk: { used: rec.disk ?? 0 },
+              network: {
+                up: rec.net_out ?? 0,
+                down: rec.net_in ?? 0,
+                totalUp: rec.net_total_out ?? rec.net_total_up ?? 0,
+                totalDown: rec.net_total_in ?? rec.net_total_down ?? 0,
+              },
+              connections: {
+                tcp: rec.connections ?? 0,
+                udp: rec.connections_udp ?? 0,
+              },
+              gpu: rec.gpu !== undefined ? { count: 0, average_usage: rec.gpu, detailed_info: [] } : undefined,
+              uptime: rec.uptime ?? 0,
+              process: rec.process ?? 0,
+              message: "",
+              updated_at: rec.time ?? 0,
+            };
+          }
+
+          const live: LiveDataResponse = {
+            data: {
+              online,
+              data: dataMap,
             },
-            disk: { used: rec.disk ?? 0 },
-            network: {
-              up: rec.net_out ?? 0,
-              down: rec.net_in ?? 0,
-              totalUp: rec.net_total_out ?? rec.net_total_up ?? 0,
-              totalDown: rec.net_total_in ?? rec.net_total_down ?? 0,
-            },
-            connections: {
-              tcp: rec.connections ?? 0,
-              udp: rec.connections_udp ?? 0,
-            },
-            gpu: rec.gpu !== undefined ? { count: 0, average_usage: rec.gpu, detailed_info: [] } : undefined,
-            uptime: rec.uptime ?? 0,
-            process: rec.process ?? 0,
-            message: "",
-            updated_at: rec.time ?? 0,
+            status: "ok",
           };
+          setLiveData(live);
+          setShowCallout(true);
+          notifyRefreshCallbacks(live);
+          return true;
+        } catch (e) {
+          if (!isCurrent()) return false;
+          console.error("RPC2 获取最新状态失败:", e);
+          setShowCallout(false);
+          return false;
         }
-
-        const live: LiveDataResponse = {
-          data: {
-            online,
-            data: dataMap,
-          },
-          status: "ok",
-        };
-        setLiveData(live);
-        setShowCallout(true);
-        notifyRefreshCallbacks(live);
-      } catch (e) {
-        if (stopped) return;
-        console.error("RPC2 获取最新状态失败:", e);
-        setShowCallout(false);
-      } finally {
-        running = false;
-        if (!stopped) {
-          timer = window.setTimeout(fetchLatest, intervalMs);
-        }
-      }
-    };
-
-    fetchLatest();
-
-    return () => {
-      stopped = true;
-      if (timer) window.clearTimeout(timer);
-    };
+      },
+    });
   }, [call, notifyRefreshCallbacks]);
 
   const contextValue = useMemo(
