@@ -5,12 +5,17 @@ import Footer from "@/components/Footer";
 import RemainingValueCalculator from "@/components/RemainingValueCalculator";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import { useSpaPathname } from "@/hooks/useSpaPathname";
-import { isMonitorRoute } from "@/lib/spaNavigation";
+import { isKomariBackendRoute, isMonitorRoute } from "@/lib/spaNavigation";
 import MonitorDataProviders from "@/components/MonitorDataProviders";
+import Loading from "@/components/loading";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = useSpaPathname();
   const isMonitorPage = isMonitorRoute(pathname);
+
+  if (isKomariBackendRoute(pathname)) {
+    return <Loading />;
+  }
 
   return (
     <>

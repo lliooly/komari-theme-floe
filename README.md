@@ -140,6 +140,7 @@ Configure a public Uptime Kuma status page with its base URL and status-page slu
 - Reverse proxies should forward <code>/api/*</code> and <code>/themes/*</code> to Komari and preserve WebSocket upgrades for <code>/api/rpc2</code>. The local <code>npm run preview</code> server provides the equivalent proxy for static-build checks.
 - If a CDN or proxy sends <code>HEAD</code> requests that the backend answers with <code>404</code>, normalize those requests at the proxy or update the backend handling.
 - Enable gzip or Brotli compression for static JavaScript, CSS and JSON assets where appropriate.
+- Keep Floe's `sw.js`, which retires the old service worker. The built-in Komari frontend's root worker can cache Floe's dashboard as the admin shell and break `/admin`. Floe also unregisters the known conflicting root worker on startup, preserving sign-in and local preferences. If a browser still serves an old cached page, unregister this site's `/sw.js` under DevTools → Application → Service Workers, then reload the admin page.
 - Same-origin Floe tabs coordinate settings writes with Web Locks when the browser supports them. This does not coordinate different browsers, devices or other admin clients; avoid editing theme settings concurrently from multiple devices because Komari 1.2.1 does not provide a compare-and-swap version check.
 
 ## Commands

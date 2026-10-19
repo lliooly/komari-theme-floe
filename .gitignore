@@ -70,7 +70,7 @@ Thumbs.db
 .pnp.*
 
 # PWA
-public/sw.js
+# public/sw.js is an intentional recovery worker, kept in source control.
 public/workbox-*.js
 public/worker-*.js
 public/sw.js.map

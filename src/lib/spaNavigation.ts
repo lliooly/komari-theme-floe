@@ -18,6 +18,10 @@ export function isMonitorRoute(pathname: string): boolean {
   return parts[0] === "instance" && Boolean(parts[1]);
 }
 
+export function isKomariBackendRoute(pathname: string): boolean {
+  return /^\/(admin|terminal)(\/|$)/.test(pathname);
+}
+
 export function navigateSpa(
   href: string,
   options: { replace?: boolean; scrollToTop?: boolean } = {}

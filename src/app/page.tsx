@@ -3,6 +3,7 @@
 import InstancePage from "@/components/instance/InstancePage";
 import DashboardContent from "@/components/DashboardContent";
 import { useSpaPathname } from "@/hooks/useSpaPathname";
+import { isMonitorRoute } from "@/lib/spaNavigation";
 
 /**
  * Main page component with client-side routing.
@@ -11,6 +12,7 @@ import { useSpaPathname } from "@/hooks/useSpaPathname";
  */
 export default function Page() {
   const pathname = useSpaPathname();
+  if (!isMonitorRoute(pathname)) return null;
   
   // Client-side routing for SPA behavior with static export
   const parts = pathname.split("/").filter(Boolean);

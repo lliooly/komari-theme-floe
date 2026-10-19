@@ -21,6 +21,7 @@ test -f preview.png
 test -f komari-theme.json
 test -d dist
 test -f dist/index.html
+test -f dist/sw.js
 jq empty komari-theme.json
 
 manifest_version="$(jq -r '.version // empty' komari-theme.json)"

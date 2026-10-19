@@ -140,6 +140,7 @@ bash build-theme.sh
 - 反向代理应将 <code>/api/*</code> 和 <code>/themes/*</code> 转发到 Komari，并为 <code>/api/rpc2</code> 保留 WebSocket 升级。本地静态构建检查可使用 <code>npm run preview</code>，该服务器会提供等效代理。
 - 如果 CDN 或代理发送的 <code>HEAD</code> 请求被后端返回 <code>404</code>，请在代理层规范化请求，或修复后端对 <code>HEAD</code> 的处理。
 - 建议为静态 JavaScript、CSS 和 JSON 资源启用 Gzip 或 Brotli 压缩。
+- 请保留 Floe 中用于停用旧 Service Worker 的 `sw.js`。Komari 内置前端的根路径 Worker 可能将 Floe 首页缓存为后台页面，导致 `/admin` 加载失败。Floe 启动时也会注销已知冲突的根路径 Worker，保留登录和本地偏好数据。已有浏览器若仍命中旧缓存，可在开发者工具的 Application → Service Workers 中注销该站点的 `/sw.js`，再刷新后台。
 - 浏览器支持时，同源 Floe 页面会使用 Web Locks 协调设置保存。它不会协调不同浏览器、设备或其他管理客户端；由于 Komari 1.2.1 没有提供 compare-and-swap 版本检查，请避免在多个设备上同时编辑主题设置。
 
 ## 常用命令

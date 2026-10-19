@@ -11,6 +11,7 @@ import { OfflineIndicator } from "@/components/OfflineIndicator"
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt"
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt"
 import i18n, { detectClientLanguage } from "@/i18n/config"
+import ServiceWorkerRecovery from "@/components/ServiceWorkerRecovery"
 
 function I18nClientLanguageSync() {
   React.useEffect(() => {
@@ -31,6 +32,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
+      <ServiceWorkerRecovery />
       <I18nClientLanguageSync />
       <ThemeProvider>
         <AnnouncementProvider>
