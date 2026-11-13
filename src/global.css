@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Curves only: authored colors, type, spacing, borders and shadows stay intact.
+   Custom properties are installed after hydration and updated on resize. */
+[data-smooth-corners=""] {
+  border-top-left-radius: var(--smooth-tl) !important;
+  border-top-right-radius: var(--smooth-tr) !important;
+  border-bottom-right-radius: var(--smooth-br) !important;
+  border-bottom-left-radius: var(--smooth-bl) !important;
+  clip-path: var(--smooth-clip) !important;
+  border-image: var(--smooth-border) !important;
+}
+
 .announcement-banner {
   border: 0;
 }

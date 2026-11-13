@@ -12,6 +12,7 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt"
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt"
 import i18n, { detectClientLanguage } from "@/i18n/config"
 import ServiceWorkerRecovery from "@/components/ServiceWorkerRecovery"
+import SmoothCorners from "@/components/SmoothCorners"
 
 function I18nClientLanguageSync() {
   React.useEffect(() => {
@@ -33,6 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <ServiceWorkerRecovery />
+      <SmoothCorners />
       <I18nClientLanguageSync />
       <ThemeProvider>
         <AnnouncementProvider>

@@ -40,6 +40,7 @@
     "clsx": "^2.1.1",
     "d3-geo": "^3.1.1",
     "dotenv": "^18.0.9",
+    "figma-squircle": "^1.1.0",
     "github-markdown-css": "^5.9.0",
     "http-proxy-middleware": "^4.2.1",
     "i18next": "^26.5.12",
