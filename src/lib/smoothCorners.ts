@@ -2,7 +2,20 @@ import { getSvgPath } from "figma-squircle";
 
 // Figma's iOS-style smoothing. Keep this shared by every surface and border.
 export const CORNER_SMOOTHING = 0.6;
+export const NATIVE_CORNER_SHAPE = "superellipse(1.5)";
+// Figma smoothing extends the corner's transition region by (1 + smoothing).
+export const NATIVE_RADIUS_SCALE = 1 + CORNER_SMOOTHING;
 export type CornerRadii = [number, number, number, number]; // TL, TR, BR, BL
+
+/** CSS scales all radii together when adjacent corners would overlap. Keep
+ * nested surfaces in that same used-radius coordinate system. */
+export function normalizeRadii(width: number, height: number, radii: CornerRadii): CornerRadii {
+  const [tl, tr, br, bl] = radii;
+  const ratio = Math.min(1,
+    width / (tl + tr || 1), width / (bl + br || 1),
+    height / (tl + bl || 1), height / (tr + br || 1));
+  return radii.map((r) => r * ratio) as CornerRadii;
+}
 
 export function smoothPath(width: number, height: number, radii: CornerRadii) {
   return getSvgPath({
@@ -23,16 +36,9 @@ export function insetRadii(radii: CornerRadii, inset: number): CornerRadii {
 }
 
 export function smoothClip(width: number, height: number, radii: CornerRadii) {
-  // Keep the exterior of the original rounded contour, not just the rectangle:
-  // focus rings and shadows occupy the area *inside* its corner bounding boxes
-  // too. Cutting those boxes would leave four visible breaks in a focus ring.
-  const exterior = "M -100000 -100000 H 100000 V 100000 H -100000 Z";
-  const original = getSvgPath({
-    width, height, cornerSmoothing: 0,
-    topLeftCornerRadius: radii[0], topRightCornerRadius: radii[1],
-    bottomRightCornerRadius: radii[2], bottomLeftCornerRadius: radii[3],
-  });
-  return `path(evenodd, '${exterior} ${original} ${smoothPath(width, height, radii)}')`;
+  // A single contour is safe for composited/animated descendants. Inverse or
+  // overlapping even-odd contours can make those descendants disappear.
+  return `path('${smoothPath(width, height, radii)}')`;
 }
 
 export function smoothBorder(

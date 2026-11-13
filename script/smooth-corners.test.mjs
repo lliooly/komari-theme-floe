@@ -1,9 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createLoader } from "./test-utils.mjs";
-import { getSvgPath } from "figma-squircle";
 
-const { CORNER_SMOOTHING, insetRadii, smoothPath, smoothClip, smoothBorder } = createLoader()("src/lib/smoothCorners.ts");
+const { CORNER_SMOOTHING, normalizeRadii, insetRadii, smoothPath, smoothClip, smoothBorder } = createLoader()("src/lib/smoothCorners.ts");
 
 test("corners use continuous transitions and retain individually square corners", () => {
   assert.equal(CORNER_SMOOTHING, 0.6);
@@ -18,11 +17,16 @@ test("inset radii track border thickness without becoming negative", () => {
   assert.deepEqual([...insetRadii([12, 6, 0, 2], 3)], [9, 3, 0, 0]);
 });
 
-test("corner clipping retains the exterior for shadows, focus and overflow", () => {
+test("nested geometry uses the same overlap normalization as CSS borders", () => {
+  assert.deepEqual([...normalizeRadii(100, 32, [19.2, 19.2, 19.2, 19.2])], [16, 16, 16, 16]);
+  assert.deepEqual([...normalizeRadii(100, 60, [12, 0, 0, 12])], [12, 0, 0, 12]);
+});
+
+test("fallback clipping uses one contour without inverse or overlapping paths", () => {
   const clip = smoothClip(120, 60, [12, 12, 12, 12]);
-  assert.match(clip, /^path\(evenodd,/);
-  assert.match(clip, /M -100000 -100000 H 100000/);
-  assert.ok(clip.includes(getSvgPath({width: 120, height: 60, cornerRadius: 12, cornerSmoothing: 0})));
+  assert.equal(clip, `path('${smoothPath(120, 60, [12, 12, 12, 12])}')`);
+  assert.equal((clip.match(/M /g) || []).length, 1);
+  assert.doesNotMatch(clip, /evenodd|100000/);
 });
 
 test("smooth border uses coordinated outer and inset paths with original color", () => {

@@ -1,18 +1,27 @@
 "use client";
 
 import { useEffect } from "react";
-import { type CornerRadii, smoothBorder, smoothClip } from "@/lib/smoothCorners";
+import { NATIVE_CORNER_SHAPE, NATIVE_RADIUS_SCALE, normalizeRadii, type CornerRadii, smoothBorder, smoothClip } from "@/lib/smoothCorners";
 
 const marker = "data-smooth-corners";
 const properties = ["--smooth-clip", "--smooth-border", "--smooth-tl", "--smooth-tr", "--smooth-br", "--smooth-bl"];
 const corners = ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"] as const;
 type Surface = { radii: CornerRadii };
 
+function finishRadiusTransitions(element: HTMLElement) {
+  for (const animation of element.getAnimations()) {
+    if ("transitionProperty" in animation && /^border-(?:(?:top|bottom)-(?:left|right)-)?radius$/.test(String(animation.transitionProperty))) {
+      animation.finish();
+    }
+  }
+}
+
 /** One observer for the whole document, including Radix/Sonner portals. No React
  * state updates or per-card observers are needed when monitoring data changes. */
 export default function SmoothCorners() {
   useEffect(() => {
-    if (!CSS.supports("clip-path", "path(evenodd, 'M 0 0 H 1 V 1 Z')")) return;
+    const nativeCorners = CSS.supports("corner-shape", NATIVE_CORNER_SHAPE);
+    if (!nativeCorners && !CSS.supports("clip-path", "path('M 0 0 H 1 V 1 Z')")) return;
 
     const surfaces = new Map<HTMLElement, Surface>();
     const watched = new Set<HTMLElement>();
@@ -37,11 +46,15 @@ export default function SmoothCorners() {
       }
       // Read the authored CSS, not the effective inset radii from our rule.
       element.removeAttribute(marker);
+      // transition-all otherwise exposes an interpolated previous output here,
+      // which would get scaled again on every refresh. Settle only the corner
+      // transitions; preserve color, transform and telemetry animations.
+      finishRadiusTransitions(element);
       const style = getComputedStyle(element);
       const width = element.offsetWidth;
       const height = element.offsetHeight;
       const raw = corners.map((corner) => style[corner]);
-      const radii = raw.map((value) => parseFloat(value) || 0) as CornerRadii;
+      let radii = raw.map((value) => parseFloat(value) || 0) as CornerRadii;
       // Observe only rounded surfaces, not every cell and icon in a large node
       // list. Hidden rounded surfaces stay observed so they recover on reveal.
       if (radii.some(Boolean)) {
@@ -59,6 +72,20 @@ export default function SmoothCorners() {
         clear(element);
         return;
       }
+
+      // Never clip shadows, focus rings, or visible overflow in older engines.
+      // Those surfaces retain their original rounding when corner-shape is
+      // unavailable. In particular, no inverse clipping is used as a workaround.
+      if (!nativeCorners && (style.boxShadow !== "none" ||
+          style.overflowX === "visible" || style.overflowY === "visible")) {
+        clear(element);
+        return;
+      }
+
+      // An explicitly inherited radius already has its parent's native scale.
+      const inherited = element.classList.contains("rounded-[inherit]") || element.style.borderRadius === "inherit";
+      if (nativeCorners && !inherited) radii.forEach((r, i) => { radii[i] = r * NATIVE_RADIUS_SCALE; });
+      radii = normalizeRadii(width, height, radii);
 
       const rect = element.getBoundingClientRect();
       // Coordinate only corners that actually sit inside a parent's corner.
@@ -83,18 +110,20 @@ export default function SmoothCorners() {
         });
       }
 
-      const widths = [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth];
-      const colors = [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor];
-      const styles = [style.borderTopStyle, style.borderRightStyle, style.borderBottomStyle, style.borderLeftStyle];
-      const uniformBorder = parseFloat(widths[0]) > 0 && widths.every((v) => v === widths[0]) &&
-        colors.every((v) => v === colors[0]) && styles.every((v) => v === "solid") && style.borderImageSource === "none";
-
-      element.style.setProperty("--smooth-clip", smoothClip(width, height, radii));
-      element.style.setProperty("--smooth-border", uniformBorder
-        ? smoothBorder(width, height, radii, parseFloat(widths[0]), colors[0])
-        : style.borderImage);
+      if (!nativeCorners) {
+        const widths = [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth];
+        const colors = [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor];
+        const styles = [style.borderTopStyle, style.borderRightStyle, style.borderBottomStyle, style.borderLeftStyle];
+        const uniformBorder = parseFloat(widths[0]) > 0 && widths.every((v) => v === widths[0]) &&
+          colors.every((v) => v === colors[0]) && styles.every((v) => v === "solid") && style.borderImageSource === "none";
+        element.style.setProperty("--smooth-clip", smoothClip(width, height, radii));
+        element.style.setProperty("--smooth-border", uniformBorder
+          ? smoothBorder(width, height, radii, parseFloat(widths[0]), colors[0])
+          : style.borderImage);
+      }
       radii.forEach((radius, i) => element.style.setProperty(properties[i + 2], `${radius}px`));
-      element.setAttribute(marker, "");
+      element.setAttribute(marker, nativeCorners ? "native" : "");
+      finishRadiusTransitions(element);
       surfaces.set(element, { radii });
     };
 

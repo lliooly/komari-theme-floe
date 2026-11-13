@@ -3,11 +3,21 @@
 
 /* Curves only: authored colors, type, spacing, borders and shadows stay intact.
    Custom properties are installed after hydration and updated on resize. */
-[data-smooth-corners=""] {
+[data-smooth-corners=""],
+[data-smooth-corners="native"] {
   border-top-left-radius: var(--smooth-tl) !important;
   border-top-right-radius: var(--smooth-tr) !important;
   border-bottom-right-radius: var(--smooth-br) !important;
   border-bottom-left-radius: var(--smooth-bl) !important;
+}
+
+[data-smooth-corners="native"] {
+  corner-shape: superellipse(1.5);
+}
+
+/* Single-contour fallback, limited to surfaces that already clip overflow and
+   have no shadow. Native corners need no clipping or compositing workaround. */
+[data-smooth-corners=""] {
   clip-path: var(--smooth-clip) !important;
   border-image: var(--smooth-border) !important;
 }
