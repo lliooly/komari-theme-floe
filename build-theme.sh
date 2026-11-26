@@ -15,6 +15,7 @@ for command_name in node npm jq zip unzip; do
 done
 
 npm ci --no-audit --no-fund
+npm run audit
 npm run build
 
 test -f preview.png

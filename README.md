@@ -2,12 +2,15 @@
 
 [![Build and Release Floe Theme](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml)
 [![MIT License](https://img.shields.io/github/license/lliooly/komari-theme-floe)](./LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/lliooly/komari-theme-floe)](https://github.com/lliooly/komari-theme-floe/releases/latest)
 
 [中文](./README-CN.md)
 
 [Demo](https://komari.probe.name) · [Download the latest theme package](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip) · [All releases](https://github.com/lliooly/komari-theme-floe/releases)
 
 Floe is an independently maintained third-party theme for [Komari](https://github.com/komari-monitor/komari). It is a static [Next.js](https://nextjs.org/) frontend that reads live data from a running Komari backend and can be installed through Komari's theme manager as a ZIP package.
+
+Floe provides the monitoring dashboard and instance pages. Komari serves its own administrator dashboard and terminal at <code>/admin</code> and <code>/terminal</code>.
 
 > Floe is not an official Komari or Komari Next release and does not represent either project's endorsement.
 
@@ -43,7 +46,7 @@ Floe is an independently maintained third-party theme for [Komari](https://githu
 
 ## Requirements
 
-- Node.js 22 or newer for local development and packaging.
+- Node.js 22 for local development and packaging, matching <code>.nvmrc</code> and CI.
 - A running Komari backend whose API is reachable from the browser.
 - Komari 1.0.5 or newer for the native theme settings form.
 
@@ -106,7 +109,7 @@ PORT=3001 npm run preview
 bash build-theme.sh
 ~~~
 
-The packaging script installs dependencies, builds the static site, validates <code>komari-theme.json</code>, checks the package contents and writes <code>dist-release.zip</code>. It requires <code>node</code>, <code>npm</code>, <code>jq</code>, <code>zip</code> and <code>unzip</code>.
+The packaging script installs and audits dependencies, builds the static site, validates <code>komari-theme.json</code>, checks the package contents and writes <code>dist-release.zip</code>. It requires <code>node</code>, <code>npm</code>, <code>jq</code>, <code>zip</code> and <code>unzip</code>.
 
 ## Theme settings and integrations
 
@@ -140,6 +143,7 @@ Configure a public Uptime Kuma status page with its base URL and status-page slu
 - Reverse proxies should forward <code>/api/*</code> and <code>/themes/*</code> to Komari and preserve WebSocket upgrades for <code>/api/rpc2</code>. The local <code>npm run preview</code> server provides the equivalent proxy for static-build checks.
 - If a CDN or proxy sends <code>HEAD</code> requests that the backend answers with <code>404</code>, normalize those requests at the proxy or update the backend handling.
 - Enable gzip or Brotli compression for static JavaScript, CSS and JSON assets where appropriate.
+- Rounded surfaces use native <code>corner-shape</code> where supported and fall back to <code>border-radius</code> in other browsers.
 - Keep Floe's `sw.js`, which retires the old service worker. The built-in Komari frontend's root worker can cache Floe's dashboard as the admin shell and break `/admin`. Floe also unregisters the known conflicting root worker on startup, preserving sign-in and local preferences. If a browser still serves an old cached page, unregister this site's `/sw.js` under DevTools → Application → Service Workers, then reload the admin page.
 - Same-origin Floe tabs coordinate settings writes with Web Locks when the browser supports them. This does not coordinate different browsers, devices or other admin clients; avoid editing theme settings concurrently from multiple devices because Komari 1.2.1 does not provide a compare-and-swap version check.
 
@@ -151,6 +155,7 @@ Configure a public Uptime Kuma status page with its base URL and status-page slu
 | <code>npm run build</code> | Create the static export in <code>dist/</code>. |
 | <code>npm run preview</code> / <code>npm start</code> | Serve <code>dist/</code> locally and proxy backend paths. |
 | <code>npm run lint</code> | Run ESLint over <code>src/</code>. |
+| <code>npm run audit</code> | Check production and development dependencies against npm's advisory database. |
 | <code>npm test</code> | Run the Node.js regression and security tests. |
 | <code>npm run lint:workflows</code> | Validate GitHub Actions workflows. |
 | <code>npm run i18n:validate</code> | Validate locale structure and placeholders. |
@@ -165,7 +170,9 @@ Configure a public Uptime Kuma status page with its base URL and status-page slu
 | --- | --- |
 | <code>src/app/page.tsx</code> | Client-side routing for the dashboard and <code>/instance/&lt;uuid&gt;</code>. |
 | <code>src/components/</code> | Dashboard, node, instance, settings and shared UI components. |
+| <code>src/components/NodeGrid.tsx</code>, <code>PingQualityBars.tsx</code> and <code>src/utils/nodeMetrics.ts</code> | Node grid, latency history strips and shared node calculations. |
 | <code>src/contexts/</code> and <code>src/lib/</code> | Live data, RPC2, theme settings, announcements and integration logic. |
+| <code>src/contexts/theme/</code> | Theme types, defaults, configuration parsing, local storage and presentation helpers. |
 | <code>src/i18n/locales/</code> | English, Simplified Chinese and Traditional Chinese translations. |
 | <code>script/</code> | Preview server, tests, localization tools and build-time checks. |
 | <code>komari-theme.json</code> | Komari theme metadata and native settings-form configuration. |
@@ -173,15 +180,24 @@ Configure a public Uptime Kuma status page with its base URL and status-page slu
 
 ## CI and releases
 
-The GitHub Actions build workflow runs locale validation, workflow checks, linting, tests, static export, theme metadata validation and ZIP verification for pull requests, <code>main</code> and version tags. Tags using the <code>vMAJOR.MINOR.PATCH</code> format publish the verified <code>dist-release.zip</code> package.
+The GitHub Actions build workflow runs dependency auditing, locale validation, workflow checks, linting, tests, static export, theme metadata validation and ZIP verification for pull requests, <code>main</code> and version tags. Tags using the <code>vMAJOR.MINOR.PATCH</code> format publish the verified <code>dist-release.zip</code> package. Each release includes the package's SHA-256 checksum.
 
 The translation workflow creates a reviewable pull request when source locale changes require synchronization. See [CI maintenance notes](./docs/ci-maintenance.md) for the repository's automation and release policies.
+
+## Dependency maintenance
+
+Floe uses Next.js 16, React 19, Recharts 3, Motion 14 and i18next 27 with react-i18next 18. Install reproducible dependencies with <code>npm ci</code> and commit <code>package-lock.json</code> with dependency changes.
+
+Dependabot checks npm packages and GitHub Actions weekly. Patch and minor updates are grouped; major updates require compatibility review. Node type definitions stay on major 22 to match the runtime. TypeScript stays within the ESLint parser's supported range; updates to TypeScript 7 are deferred until the toolchain supports them.
+
+Run <code>npm run audit</code> after dependency updates. CI checks both production and development dependencies and fails on any reported vulnerability of low severity or higher. Audit results reflect the advisory database at the time of the check; they do not guarantee that a dependency has no undiscovered vulnerabilities.
 
 ## Contributing
 
 Issues and pull requests are welcome. Before submitting a change, run the checks relevant to your work, especially:
 
 ~~~bash
+npm run audit
 npm run lint
 npm test
 npm run build

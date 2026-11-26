@@ -2,12 +2,15 @@
 
 [![Build and Release Floe Theme](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/lliooly/komari-theme-floe/actions/workflows/build.yaml)
 [![MIT License](https://img.shields.io/github/license/lliooly/komari-theme-floe)](./LICENSE)
+[![最新版本](https://img.shields.io/github/v/release/lliooly/komari-theme-floe)](https://github.com/lliooly/komari-theme-floe/releases/latest)
 
 [English](./README.md)
 
 [演示站点](https://komari.probe.name) · [下载最新主题包](https://github.com/lliooly/komari-theme-floe/releases/latest/download/dist-release.zip) · [查看全部版本](https://github.com/lliooly/komari-theme-floe/releases)
 
 Floe 是一个独立维护的 [Komari](https://github.com/komari-monitor/komari) 第三方主题。它是一个静态导出的 [Next.js](https://nextjs.org/) 前端，通过正在运行的 Komari 后端读取实时数据，也可以作为 ZIP 主题包通过 Komari 的主题管理器安装。
+
+Floe 提供监控仪表盘和实例详情页。<code>/admin</code> 管理后台和 <code>/terminal</code> 终端由 Komari 自身提供。
 
 > Floe 不是 Komari 或 Komari Next 的官方发布版本，也不代表任一项目的官方背书。
 
@@ -43,7 +46,7 @@ Floe 是一个独立维护的 [Komari](https://github.com/komari-monitor/komari)
 
 ## 前置要求
 
-- Node.js 22 或更高版本，用于本地开发和主题打包。
+- Node.js 22，用于本地开发和主题打包，与 <code>.nvmrc</code> 和 CI 保持一致。
 - 一个可从浏览器访问 API 的 Komari 后端实例。
 - Komari 1.0.5 或更高版本，用于支持主题原生设置表单。
 
@@ -106,7 +109,7 @@ PORT=3001 npm run preview
 bash build-theme.sh
 ~~~
 
-打包脚本会安装依赖、构建静态站点、校验 <code>komari-theme.json</code>、检查 ZIP 内容，并生成 <code>dist-release.zip</code>。该脚本需要 <code>node</code>、<code>npm</code>、<code>jq</code>、<code>zip</code> 和 <code>unzip</code>。
+打包脚本会安装并审计依赖、构建静态站点、校验 <code>komari-theme.json</code>、检查 ZIP 内容，并生成 <code>dist-release.zip</code>。该脚本需要 <code>node</code>、<code>npm</code>、<code>jq</code>、<code>zip</code> 和 <code>unzip</code>。
 
 ## 主题设置与集成
 
@@ -140,6 +143,7 @@ bash build-theme.sh
 - 反向代理应将 <code>/api/*</code> 和 <code>/themes/*</code> 转发到 Komari，并为 <code>/api/rpc2</code> 保留 WebSocket 升级。本地静态构建检查可使用 <code>npm run preview</code>，该服务器会提供等效代理。
 - 如果 CDN 或代理发送的 <code>HEAD</code> 请求被后端返回 <code>404</code>，请在代理层规范化请求，或修复后端对 <code>HEAD</code> 的处理。
 - 建议为静态 JavaScript、CSS 和 JSON 资源启用 Gzip 或 Brotli 压缩。
+- 圆角表面在浏览器支持时使用原生 <code>corner-shape</code>，其他浏览器回退到 <code>border-radius</code>。
 - 请保留 Floe 中用于停用旧 Service Worker 的 `sw.js`。Komari 内置前端的根路径 Worker 可能将 Floe 首页缓存为后台页面，导致 `/admin` 加载失败。Floe 启动时也会注销已知冲突的根路径 Worker，保留登录和本地偏好数据。已有浏览器若仍命中旧缓存，可在开发者工具的 Application → Service Workers 中注销该站点的 `/sw.js`，再刷新后台。
 - 浏览器支持时，同源 Floe 页面会使用 Web Locks 协调设置保存。它不会协调不同浏览器、设备或其他管理客户端；由于 Komari 1.2.1 没有提供 compare-and-swap 版本检查，请避免在多个设备上同时编辑主题设置。
 
@@ -151,6 +155,7 @@ bash build-theme.sh
 | <code>npm run build</code> | 在 <code>dist/</code> 中生成静态站点。 |
 | <code>npm run preview</code> / <code>npm start</code> | 本地托管 <code>dist/</code> 并代理后端路径。 |
 | <code>npm run lint</code> | 对 <code>src/</code> 运行 ESLint。 |
+| <code>npm run audit</code> | 根据 npm 安全公告数据库检查生产和开发依赖。 |
 | <code>npm test</code> | 运行 Node.js 回归测试和安全测试。 |
 | <code>npm run lint:workflows</code> | 校验 GitHub Actions 工作流。 |
 | <code>npm run i18n:validate</code> | 校验语言文件结构和占位符。 |
@@ -165,7 +170,9 @@ bash build-theme.sh
 | --- | --- |
 | <code>src/app/page.tsx</code> | 处理仪表盘和 <code>/instance/&lt;uuid&gt;</code> 的客户端路由。 |
 | <code>src/components/</code> | 仪表盘、节点、实例、设置和通用 UI 组件。 |
+| <code>src/components/NodeGrid.tsx</code>、<code>PingQualityBars.tsx</code> 和 <code>src/utils/nodeMetrics.ts</code> | 节点网格、延迟历史条和节点共享计算。 |
 | <code>src/contexts/</code> 和 <code>src/lib/</code> | 实时数据、RPC2、主题设置、公告和集成逻辑。 |
+| <code>src/contexts/theme/</code> | 主题类型、默认值、配置解析、本地存储和样式计算。 |
 | <code>src/i18n/locales/</code> | English、简体中文和繁体中文翻译。 |
 | <code>script/</code> | 本地预览服务器、测试、本地化工具和构建检查。 |
 | <code>komari-theme.json</code> | Komari 主题元数据和原生设置表单配置。 |
@@ -173,15 +180,24 @@ bash build-theme.sh
 
 ## CI 与发布
 
-GitHub Actions 构建工作流会在 Pull Request、<code>main</code> 分支和版本标签上运行语言文件校验、工作流检查、Lint、测试、静态导出、主题元数据校验和 ZIP 校验。使用 <code>vMAJOR.MINOR.PATCH</code> 格式的标签会发布经过校验的 <code>dist-release.zip</code>。
+GitHub Actions 构建工作流会在 Pull Request、<code>main</code> 分支和版本标签上运行依赖安全审计、语言文件校验、工作流检查、Lint、测试、静态导出、主题元数据校验和 ZIP 校验。使用 <code>vMAJOR.MINOR.PATCH</code> 格式的标签会发布经过校验的 <code>dist-release.zip</code>，Release 中附有主题包的 SHA-256 校验和。
 
 当源语言文件发生需要同步的变化时，翻译工作流会创建可供人工审阅的 Pull Request。详细的自动化和发布策略请参阅 [CI 维护说明](./docs/ci-maintenance.md)。
+
+## 依赖维护
+
+Floe 使用 Next.js 16、React 19、Recharts 3、Motion 14，以及 i18next 27 和 react-i18next 18。本地通过 <code>npm ci</code> 安装锁定依赖；修改依赖时，请同时提交 <code>package-lock.json</code>。
+
+Dependabot 每周检查 npm 包和 GitHub Actions，将 patch、minor 更新分组，major 更新需单独评估兼容性。Node 类型定义保持在 22 主版本，与运行时一致。TypeScript 保持在 ESLint 解析器支持的范围内，待工具链支持后再升级至 TypeScript 7。
+
+更新依赖后请运行 <code>npm run audit</code>。CI 同时审计生产和开发依赖，发现 low 或以上级别的已知漏洞时会阻止构建通过。审计结果以检查时的安全公告数据库为准，不代表依赖不存在尚未披露的漏洞。
 
 ## 参与贡献
 
 欢迎提交 Issue 和 Pull Request。提交变更前，请至少运行与你的修改相关的检查，尤其是：
 
 ~~~bash
+npm run audit
 npm run lint
 npm test
 npm run build

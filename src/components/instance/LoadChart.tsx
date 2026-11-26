@@ -206,8 +206,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
       day: "2-digit",hour: "2-digit",
       minute: "2-digit",});
   };
-  const percentageFormatter = (value: number) => {
-    return `${value.toFixed(2)}%`;
+  const percentageFormatter = (value: unknown) => {
+    return typeof value === "number" ? `${value.toFixed(2)}%` : "--";
   };
 
   const ChartTitle = (text: string, rightText: React.ReactNode) => {
@@ -493,7 +493,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               />
               <ChartTooltip
                 cursor={false}
-                formatter={formatBytes}
+                formatter={(value) => typeof value === "number" ? formatBytes(value) : "--"}
                 content={
                   <ChartTooltipContent
                     labelFormatter={lableFormatter}
@@ -562,7 +562,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               />
               <ChartTooltip
                 cursor={false}
-                formatter={formatBytes}
+                formatter={(value) => typeof value === "number" ? formatBytes(value) : "--"}
                 content={
                   <ChartTooltipContent
                     labelFormatter={lableFormatter}

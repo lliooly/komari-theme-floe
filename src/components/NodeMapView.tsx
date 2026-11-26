@@ -6,6 +6,7 @@ import { geoGraticule10, geoNaturalEarth1, geoPath } from "d3-geo";
 import { MapPinned } from "@/components/Icones/Reicon";
 import { feature } from "topojson-client";
 import { useTranslation } from "react-i18next";
+import type { TFunction as TranslateFn } from "i18next";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
@@ -27,7 +28,6 @@ export interface NodeMapViewProps {
   revealReady?: boolean;
 }
 
-type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
 type HoveredRegion = {
   regionKey: string;
   x: number;

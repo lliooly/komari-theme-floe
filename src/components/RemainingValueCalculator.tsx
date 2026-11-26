@@ -3,6 +3,7 @@
 import { RefreshCw } from "@/components/Icones/Reicon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction as TranslateFn } from "i18next";
 
 import { Button } from "@/components/ui/button";
 import { ActionFeedbackIcon } from "@/components/ui/action-feedback-icon";
@@ -38,7 +39,6 @@ const DISPLAY_CURRENCIES = ["USD", "CNY", "EUR", "GBP"] as const;
 
 type DisplayCurrency = (typeof DISPLAY_CURRENCIES)[number];
 type DetailFilter = "all" | "active" | "skipped" | "expired";
-type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
 
 function formatConvertedAmount(t: TranslateFn, code: string, value: number | null) {
   if (value === null) {

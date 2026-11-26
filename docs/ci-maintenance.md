@@ -4,7 +4,7 @@
 
 | 工作流 | 触发 | 权限及产出 |
 | --- | --- | --- |
-| Build and Release Floe Theme | main push、PR、版本标签、手动 | `build` 只读，执行工作流校验、翻译校验、lint、测试、构建及主题包校验；标签发布 job 单独获得 contents write |
+| Build and Release Floe Theme | main push、PR、版本标签、手动 | `build` 只读，执行依赖审计、工作流校验、翻译校验、lint、测试、构建及主题包校验；标签发布 job 单独获得 contents write |
 | Dependabot auto-merge | 面向 main 的 pull_request_target | 仅可信 Dependabot patch/minor；不 checkout、不安装依赖、不执行 PR 代码；核验必需检查后审批并启用 Auto-merge |
 | i18n sync | main 翻译相关路径变更、main 手动执行 | 无变化不安装依赖；有变化时生成并验证翻译，创建 `automation/i18n-sync` PR，并显式触发该分支的 build |
 | Dependabot Updates | 每周 | npm / GitHub Actions 分别最多 5 个待处理 PR；patch/minor 分组，major 单独处理 |
@@ -15,6 +15,7 @@ Node 版本统一由 `.nvmrc` 管理。所有 `uses` 固定为已核验的完整
 
 ```bash
 npm ci --no-audit --no-fund
+npm run audit
 npm run lint:workflows
 npm run i18n:validate
 npm run lint
@@ -23,6 +24,10 @@ npm run build
 ```
 
 `lint:workflows` 优先使用 PATH 中的 actionlint。GitHub 的 Linux x64 runner 没有该工具时，下载固定 1.7.12 版本并验证仓库内固定的 SHA-256；其他平台请先安装 actionlint。升级校验器时同时更新版本与校验和。
+
+`npm run audit` 检查完整依赖树，包括开发工具，发现 low 或以上级别的已知漏洞时返回失败。CI 在安装后单独执行此检查；`npm ci --no-audit` 仅避免安装期间重复审计。更新锁文件后需重新审计，不通过忽略告警或提高阈值来绕过检查。
+
+Dependabot 的 `@types/node` 仅接收当前运行时主版本 22 内的更新；升级 `.nvmrc` 时同步调整类型版本与忽略规则。TypeScript 7 暂不在 `typescript-eslint` 支持范围内，待工具链支持后移除对应版本忽略规则。
 
 PR 只执行质量检查，不上传发布产物；main、标签和手动构建产物保留 7 天。这样避免 Dependabot 的受限 PR token 在无用的 artifact finalize 阶段失败，也减少存储消耗。已经压缩的 ZIP 不再进行第二次压缩。每个质量检查 job 只安装一次依赖，不拆分成重复安装的 lint/test/build jobs。当前构建较快，未引入跨运行产物复用或额外 Next 缓存。
 

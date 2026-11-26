@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # Match the Node.js runtime in .nvmrc; keep patch/minor updates enabled.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # typescript-eslint currently supports TypeScript < 6.1.
+      - dependency-name: "typescript"
+        versions: [">=7"]
     groups:
       compatible-updates:
         patterns: ["*"]
