@@ -91,7 +91,9 @@ const NavBar = () => {
             }`}
           >
             <div
-              className={`flex items-center justify-center rounded-lg bg-primary shadow-md shadow-primary/20 transition-all duration-300 motion-reduce:transition-none ${
+              // Keep the logo's corners independent of the navbar's animated inset.
+              data-smooth-corners="off"
+              className={`flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary shadow-md shadow-primary/20 transition-all duration-300 motion-reduce:transition-none ${
                 isCompact ? "h-7 w-7" : "h-8 w-8"
               }`}
             >
@@ -100,7 +102,7 @@ const NavBar = () => {
                   src={logoUrl}
                   alt=""
                   aria-hidden="true"
-                  className="h-full w-full rounded-lg object-contain"
+                  className="h-full w-full object-contain"
                   draggable={false}
                   onError={() => setLogoLoadFailed(true)}
                 />
