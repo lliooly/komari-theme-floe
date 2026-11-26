@@ -56,9 +56,11 @@ rm -f dist-release.zip
 )
 
 unzip -tq dist-release.zip
-unzip -Z1 dist-release.zip | grep -Fxq "komari-theme.json"
-unzip -Z1 dist-release.zip | grep -Fxq "preview.png"
-unzip -Z1 dist-release.zip | grep -q '^dist/'
+# Read the list once so grep -q cannot SIGPIPE unzip under pipefail.
+unzip -Z1 dist-release.zip > "$package_dir/package-files.txt"
+grep -Fxq "komari-theme.json" "$package_dir/package-files.txt"
+grep -Fxq "preview.png" "$package_dir/package-files.txt"
+grep -Fxq "dist/index.html" "$package_dir/package-files.txt"
 
 if command -v sha256sum >/dev/null 2>&1; then
   sha256sum dist-release.zip

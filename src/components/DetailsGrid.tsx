@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useNodeList } from "@/contexts/NodeListContext";
 import { useLiveData } from "@/contexts/LiveDataContext";
-import { formatUptime } from "./Node";
+import { formatUptime } from "@/utils/nodeMetrics";
 import { formatBytes } from "@/utils/unitHelper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

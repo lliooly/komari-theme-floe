@@ -593,26 +593,3 @@ export const isRegionMatch = (regionEmoji: string, searchTerm: string): boolean 
     alias.toLowerCase().includes(lowerSearchTerm)
   );
 };
-
-/**
- * 获取地区的显示名称
- * @param regionEmoji 地区emoji
- * @param language 语言 ('en' | 'zh')
- * @returns 地区名称
- */
-export const getRegionDisplayName = (regionEmoji: string, language: 'en' | 'zh' = 'zh'): string => {
-  const regionInfo = emojiToRegionMap[regionEmoji];
-  if (!regionInfo) {
-    return regionEmoji;
-  }
-  
-  return language === 'zh' ? regionInfo.zh : regionInfo.en;
-};
-
-/**
- * 获取所有支持的地区emoji列表
- * @returns 地区emoji数组
- */
-export const getSupportedRegions = (): string[] => {
-  return Object.keys(emojiToRegionMap);
-};

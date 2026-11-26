@@ -366,23 +366,3 @@ export function cutPeakValues<T extends { [key: string]: any }>(
 
   return result;
 }
-
-/**
- * @deprecated 使用服务端传递的 loss 字段
- * 计算丢包率
- * 根据图表数据计算丢包率，null或undefined的数据视为丢包
- * @param chartData 图表数据数组（包含填充的null值）
- * @param taskId 任务ID
- * @returns 丢包率百分比，保留1位小数
- */
-export function calculateLossRate(chartData: any[], taskId: number): number {
-  if (!chartData || chartData.length === 0) return 0;
-
-  const totalCount = chartData.length;
-  const lostCount = chartData.filter(
-    (dataPoint) => dataPoint[taskId] === null || dataPoint[taskId] === undefined
-  ).length;
-
-  const lossRate = (lostCount / totalCount) * 100;
-  return Math.round(lossRate * 10) / 10; // 保留1位小数
-}

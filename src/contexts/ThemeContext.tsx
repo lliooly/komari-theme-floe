@@ -1,694 +1,84 @@
 "use client";
 
+import i18n, { detectClientLanguage, normalizeLanguage } from "@/i18n/config";
+import { updateThemeSettings } from "@/lib/themeSettings";
+import type { UptimeKumaSettings } from "@/lib/uptimeKuma";
+import { useTheme as useNextTheme } from "next-themes";
 import React, {
   createContext,
+  ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  ReactNode,
 } from "react";
-import { useTheme as useNextTheme } from "next-themes";
 import { toast } from "sonner";
-import { updateThemeSettings } from "@/lib/themeSettings";
-import type { UptimeKumaSettings } from "@/lib/uptimeKuma";
-import i18n, { detectClientLanguage, normalizeLanguage } from "@/i18n/config";
-
-export type ColorTheme = "default" | "ocean" | "sunset" | "forest" | "midnight" | "rose";
-export type CardLayout = "classic" | "modern" | "minimal" | "detailed" | "compact";
-export type CardDesign = "default" | "quality-bars";
-export type StatusDesign = "default" | "speed";
-export type GraphDesign = "circle" | "progress" | "bar" | "minimal";
-export type NodeViewMode = "grid" | "table";
-export type BackgroundBlurType = "soft" | "glass";
-export type CardBlurType = BackgroundBlurType;
-export type Appearance = "light" | "dark" | "system";
-
-export interface ThemeConfig {
-  colorTheme: ColorTheme;
-  cardLayout: CardLayout;
-  cardDesign: CardDesign;
-  statusDesign: StatusDesign;
-  graphDesign: GraphDesign;
-  showRamDiskTotal: boolean;
-  backgroundImageUrl?: string;
-  backgroundBlurEnabled: boolean;
-  backgroundBlurType: BackgroundBlurType;
-  backgroundBlurIntensity: number;
-  backgroundMaskOpacity: number;
-  cardBlurEnabled: boolean;
-  cardBlurType: CardBlurType;
-  // Persisted key kept for compatibility; this now drives card transparency.
-  cardBlurIntensity: number;
-  cardExtraBlurIntensity: number;
-}
-
-export type StatusCardsVisibility = {
-  currentTime: boolean;
-  currentOnline: boolean;
-  regionOverview: boolean;
-  trafficOverview: boolean;
-  networkSpeed: boolean;
-  mapView: boolean;
-};
-
-export type GuestDisplaySettings = {
-  showPrice: boolean;
-  showExpiredAt: boolean;
-};
-
-export interface ManagedThemeSettings extends Partial<ThemeConfig> {
-  logoUrl?: string;
-  statusCardsVisibility?: Partial<StatusCardsVisibility>;
-  guestDisplay?: Partial<GuestDisplaySettings>;
-  uptimeKuma?: Partial<UptimeKumaSettings>;
-  nodeViewMode?: NodeViewMode;
-  appearance?: Appearance;
-  language?: string;
-}
-
-interface ThemeContextType {
-  themeConfig: ThemeConfig;
-  managedThemeSettings: ManagedThemeSettings;
-  isThemeSettingsAdmin: boolean;
-  isThemeSettingsAdminReady: boolean;
-  isThemeLoaded: boolean;
-  isLoggedIn: boolean;
-  statusCardsVisibility: StatusCardsVisibility;
-  guestDisplay: GuestDisplaySettings;
-  nodeViewMode: NodeViewMode;
-  appearance: Appearance;
-  language: string;
-  setColorTheme: (theme: ColorTheme) => void;
-  setCardLayout: (layout: CardLayout) => void;
-  setCardDesign: (design: CardDesign) => void;
-  setStatusDesign: (design: StatusDesign) => void;
-  setGraphDesign: (design: GraphDesign) => void;
-  setShowRamDiskTotal: (show: boolean) => void;
-  setBackgroundImageUrl: (url: string) => void;
-  setBackgroundBlurEnabled: (enabled: boolean) => void;
-  setBackgroundBlurType: (type: BackgroundBlurType) => void;
-  setBackgroundBlurIntensity: (intensity: number) => void;
-  setBackgroundMaskOpacity: (opacity: number) => void;
-  setCardBlurEnabled: (enabled: boolean) => void;
-  setCardBlurType: (type: CardBlurType) => void;
-  setCardTransparentIntensity: (intensity: number) => void;
-  setCardBlurIntensity: (intensity: number) => void;
-  setCardExtraBlurIntensity: (intensity: number) => void;
-  setStatusCardVisibility: (key: keyof StatusCardsVisibility, checked: boolean) => void;
-  setGuestDisplay: (key: keyof GuestDisplaySettings, checked: boolean) => void;
-  setNodeViewMode: (value: NodeViewMode) => void;
-  setAppearance: (value: Appearance) => void;
-  setLanguage: (value: string) => void;
-  setLogoUrl: (value: string) => void;
-  setUptimeKuma: (patch: Partial<UptimeKumaSettings>) => void;
-}
+import {
+  APPEARANCE_STORAGE_KEY,
+  DEFAULT_APPEARANCE,
+  DEFAULT_GUEST_DISPLAY_SETTINGS,
+  DEFAULT_NODE_VIEW_MODE,
+  DEFAULT_STATUS_CARDS_VISIBILITY,
+  DEFAULT_THEME_CONFIG,
+  LANGUAGE_STORAGE_KEY,
+  LOCAL_OVERRIDE_BASE_SIGNATURE_KEY,
+  NEXT_THEMES_STORAGE_KEY,
+  NODE_VIEW_CHANGE_EVENT,
+  NODE_VIEW_STORAGE_KEY,
+  STATUS_CARDS_CHANGE_EVENT,
+  STATUS_CARDS_STORAGE_KEY,
+} from "./theme/constants";
+import {
+  getManagedSettingsSignature,
+  mergeManagedSettings,
+  normalizeManagedThemeSettings,
+  normalizeThemeConfig,
+  parseThemeSettings,
+} from "./theme/model";
+import {
+  CARD_BLUR_STYLE_PROPERTIES,
+  clampBackgroundBlurIntensity,
+  cssAlpha,
+  cssString,
+  getBackgroundBlurPresentation,
+  getCardBlurPresentation,
+} from "./theme/presentation";
+import {
+  clearI18nLanguageCache,
+  hasLocalOverrides,
+  readInitialAppearanceOverride,
+  readInitialLanguageOverride,
+  readInitialNodeViewOverride,
+  readInitialStatusCardsOverrides,
+  readInitialThemeOverrides,
+  readStringStorage,
+  removeStorage,
+  writeJsonStorage,
+  writeStringStorage,
+  writeThemeOverrides,
+} from "./theme/storage";
+import type {
+  Appearance,
+  BackgroundBlurType,
+  CardBlurType,
+  CardDesign,
+  CardLayout,
+  ColorTheme,
+  GraphDesign,
+  GuestDisplaySettings,
+  ManagedThemeSettings,
+  NodeViewMode,
+  StatusCardsVisibility,
+  StatusDesign,
+  ThemeConfig,
+  ThemeContextType,
+} from "./theme/types";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const LEGACY_THEME_STORAGE_KEY = "komari-theme-config";
-const THEME_OVERRIDES_STORAGE_KEY = "komari-theme-config-overrides";
-const STATUS_CARDS_STORAGE_KEY = "statusCardsVisibility";
-const STATUS_CARDS_CHANGE_EVENT = "statusCardsVisibilityChange";
-const NODE_VIEW_STORAGE_KEY = "nodeViewMode";
-const NODE_VIEW_CHANGE_EVENT = "nodeViewModeChange";
-const APPEARANCE_STORAGE_KEY = "komari-appearance";
-const NEXT_THEMES_STORAGE_KEY = "theme";
-const LANGUAGE_STORAGE_KEY = "komari-language";
-const I18NEXT_STORAGE_KEY = "i18nextLng";
-const LOCAL_OVERRIDE_BASE_SIGNATURE_KEY = "komari-theme-local-override-base";
-
-const COLOR_THEMES: ColorTheme[] = ["default", "ocean", "sunset", "forest", "midnight", "rose"];
-const CARD_LAYOUTS: CardLayout[] = ["classic", "modern", "minimal", "detailed", "compact"];
-const CARD_DESIGNS: CardDesign[] = ["default", "quality-bars"];
-const STATUS_DESIGNS: StatusDesign[] = ["default", "speed"];
-const GRAPH_DESIGNS: GraphDesign[] = ["circle", "progress", "bar", "minimal"];
-const NODE_VIEW_MODES: NodeViewMode[] = ["grid", "table"];
-const APPEARANCES: Appearance[] = ["light", "dark", "system"];
-const BACKGROUND_BLUR_TYPES: BackgroundBlurType[] = ["soft", "glass"];
-const CARD_BLUR_STYLE_PROPERTIES = {
-  filter: "--komari-card-backdrop-filter",
-  backgroundAlpha: "--komari-card-background-alpha",
-  borderAlpha: "--komari-card-border-alpha",
-  glassStartAlpha: "--komari-card-glass-start-alpha",
-  glassMiddleAlpha: "--komari-card-glass-middle-alpha",
-  glassEndAlpha: "--komari-card-glass-end-alpha",
-  glassHighlightMix: "--komari-card-glass-highlight-mix",
-  glassDarkHighlightMix: "--komari-card-glass-dark-highlight-mix",
-  glassBorderWhiteMix: "--komari-card-glass-border-white-mix",
-  glassDarkBorderWhiteMix: "--komari-card-glass-dark-border-white-mix",
-  glassOutlineAlpha: "--komari-card-glass-outline-alpha",
-  glassDarkOutlineAlpha: "--komari-card-glass-dark-outline-alpha",
-  glassShadowAlpha: "--komari-card-glass-shadow-alpha",
-  glassSecondaryShadowAlpha: "--komari-card-glass-secondary-shadow-alpha",
-  glassDarkShadowAlpha: "--komari-card-glass-dark-shadow-alpha",
-  glassDarkSecondaryShadowAlpha: "--komari-card-glass-dark-secondary-shadow-alpha",
-  glassInnerHighlightAlpha: "--komari-card-glass-inner-highlight-alpha",
-  glassDarkInnerHighlightAlpha: "--komari-card-glass-dark-inner-highlight-alpha",
-  glassInnerLowlightAlpha: "--komari-card-glass-inner-lowlight-alpha",
-  glassDarkInnerLowlightAlpha: "--komari-card-glass-dark-inner-lowlight-alpha",
-} as const;
-
-const DEFAULT_THEME_CONFIG: ThemeConfig = {
-  colorTheme: "default",
-  cardLayout: "classic",
-  cardDesign: "default",
-  statusDesign: "default",
-  graphDesign: "circle",
-  showRamDiskTotal: false,
-  backgroundImageUrl: "",
-  backgroundBlurEnabled: false,
-  backgroundBlurType: "soft",
-  backgroundBlurIntensity: 35,
-  backgroundMaskOpacity: 0,
-  cardBlurEnabled: false,
-  cardBlurType: "glass",
-  cardBlurIntensity: 35,
-  cardExtraBlurIntensity: 35,
-};
-
-export const DEFAULT_STATUS_CARDS_VISIBILITY: StatusCardsVisibility = {
-  currentTime: true,
-  currentOnline: true,
-  regionOverview: true,
-  trafficOverview: true,
-  networkSpeed: true,
-  mapView: true,
-};
-
-export const DEFAULT_GUEST_DISPLAY_SETTINGS: GuestDisplaySettings = {
-  showPrice: false,
-  showExpiredAt: false,
-};
-
-export const DEFAULT_NODE_VIEW_MODE: NodeViewMode = "grid";
-export const DEFAULT_APPEARANCE: Appearance = "system";
-
 type AdminState = "loading" | "yes" | "no";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
-
-function readJsonStorage(key: string): unknown {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return null;
-  }
-
-  try {
-    const item = window.localStorage.getItem(key);
-    return item ? JSON.parse(item) : null;
-  } catch (error) {
-    console.warn(`Error reading localStorage key "${key}":`, error);
-    return null;
-  }
-}
-
-function writeJsonStorage(key: string, value: unknown) {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return;
-  }
-
-  try {
-    if (isRecord(value) && Object.keys(value).length === 0) {
-      window.localStorage.removeItem(key);
-      return;
-    }
-
-    if (value === undefined || value === null) {
-      window.localStorage.removeItem(key);
-      return;
-    }
-
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.warn(`Error setting localStorage key "${key}":`, error);
-  }
-}
-
-function removeStorage(key: string) {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return;
-  }
-
-  window.localStorage.removeItem(key);
-}
-
-function readStringStorage(key: string): string | null {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return null;
-  }
-
-  return window.localStorage.getItem(key);
-}
-
-function writeStringStorage(key: string, value: string) {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return;
-  }
-
-  window.localStorage.setItem(key, value);
-}
-
-function clearI18nLanguageCache() {
-  removeStorage(I18NEXT_STORAGE_KEY);
-
-  if (typeof document !== "undefined") {
-    document.cookie = "i18next=; Max-Age=0; path=/";
-  }
-}
-
-function writeThemeOverrides(value: Partial<ThemeConfig>) {
-  writeJsonStorage(THEME_OVERRIDES_STORAGE_KEY, value);
-
-  removeStorage(LEGACY_THEME_STORAGE_KEY);
-}
-
-function parseThemeSettings(input: unknown): Record<string, unknown> {
-  if (typeof input === "string") {
-    try {
-      const parsed = JSON.parse(input);
-      return isRecord(parsed) ? parsed : {};
-    } catch {
-      return {};
-    }
-  }
-
-  return isRecord(input) ? input : {};
-}
-
-function pickEnum<T extends string>(value: unknown, allowed: readonly T[]): T | undefined {
-  return typeof value === "string" && allowed.includes(value as T) ? (value as T) : undefined;
-}
-
-function pickAppearance(value: unknown): Appearance | undefined {
-  return pickEnum(value, APPEARANCES);
-}
-
-function pickManagedLanguage(value: unknown): string | undefined {
-  if (typeof value !== "string" || value === "auto") {
-    return undefined;
-  }
-
-  return normalizeLanguage(value);
-}
-
-function pickString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
-
-function pickBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function pickBlurType(value: unknown): BackgroundBlurType | undefined {
-  return pickEnum(value, BACKGROUND_BLUR_TYPES);
-}
-
-function pickNumber(value: unknown): number | undefined {
-  const numberValue =
-    typeof value === "number"
-      ? value
-      : typeof value === "string" && value.trim() !== ""
-        ? Number(value)
-        : NaN;
-
-  return Number.isFinite(numberValue) ? numberValue : undefined;
-}
-
-function clampBackgroundBlurIntensity(value: number): number {
-  return Math.min(100, Math.max(0, Math.round(value)));
-}
-
-function cssPercent(value: number): string {
-  return `${Math.round(value)}%`;
-}
-
-function cssAlpha(value: number): string {
-  return Number(value.toFixed(3)).toString();
-}
-
-function cssString(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, "\\\"")
-    .replace(/\n/g, "\\A ")
-    .replace(/\r/g, "\\D ")
-    .replace(/\f/g, "\\C ");
-}
-
-function getBackgroundBlurPresentation(
-  type: BackgroundBlurType,
-  intensity: number,
-  enabled: boolean
-) {
-  if (!enabled || intensity <= 0) {
-    return {
-      filter: "none",
-      bleed: "0px",
-    };
-  }
-
-  const normalized = clampBackgroundBlurIntensity(intensity);
-  const blur = (multiplier: number) => Number((normalized * multiplier).toFixed(1));
-  const amount = normalized / 100;
-
-  const filterByType: Record<BackgroundBlurType, string> = {
-    soft: `blur(${blur(0.1)}px) saturate(${(1 + amount * 0.04).toFixed(2)})`,
-    glass: `blur(${blur(0.42)}px) saturate(${(1 + amount * 1.1).toFixed(2)}) brightness(${(1 + amount * 0.12).toFixed(2)}) contrast(${(1 - amount * 0.1).toFixed(2)})`,
-  };
-
-  return {
-    filter: filterByType[type],
-    bleed: `${Math.ceil(normalized * 0.28)}px`,
-  };
-}
-
-function getCardBlurPresentation(
-  type: CardBlurType,
-  transparentIntensity: number,
-  extraBlurIntensity: number,
-  enabled: boolean
-) {
-  if (!enabled) {
-    return {
-      filter: "none",
-      backgroundAlpha: "100%",
-      borderAlpha: "100%",
-      glassStartAlpha: "100%",
-      glassMiddleAlpha: "100%",
-      glassEndAlpha: "100%",
-      glassHighlightMix: "0%",
-      glassDarkHighlightMix: "0%",
-      glassBorderWhiteMix: "0%",
-      glassDarkBorderWhiteMix: "0%",
-      glassOutlineAlpha: "0",
-      glassDarkOutlineAlpha: "0",
-      glassShadowAlpha: "0",
-      glassSecondaryShadowAlpha: "0",
-      glassDarkShadowAlpha: "0",
-      glassDarkSecondaryShadowAlpha: "0",
-      glassInnerHighlightAlpha: "0",
-      glassDarkInnerHighlightAlpha: "0",
-      glassInnerLowlightAlpha: "0",
-      glassDarkInnerLowlightAlpha: "0",
-    };
-  }
-
-  const transparentNormalized = clampBackgroundBlurIntensity(transparentIntensity);
-  const extraBlurNormalized = clampBackgroundBlurIntensity(extraBlurIntensity);
-  const blur = (multiplier: number) => Number((extraBlurNormalized * multiplier).toFixed(1));
-  const transparentAmount = transparentNormalized / 100;
-  const extraBlurAmount = extraBlurNormalized / 100;
-
-  const filterByType: Record<CardBlurType, string> = {
-    soft: `blur(${blur(0.08)}px) saturate(${(1 + extraBlurAmount * 0.06).toFixed(2)})`,
-    glass: `blur(${blur(0.42)}px) saturate(${(1 + extraBlurAmount * 1.15).toFixed(2)}) brightness(${(1 + extraBlurAmount * 0.12).toFixed(2)}) contrast(${(1 - extraBlurAmount * 0.1).toFixed(2)})`,
-  };
-
-  const backgroundAlphaByType: Record<CardBlurType, number> = {
-    soft: 100 - transparentAmount * 100,
-    glass: 72 - transparentAmount * 36,
-  };
-
-  const borderAlphaByType: Record<CardBlurType, number> = {
-    soft: 90 - transparentAmount * 60,
-    glass: 80 + transparentAmount * 20,
-  };
-
-  return {
-    filter: extraBlurNormalized > 0 ? filterByType[type] : "none",
-    backgroundAlpha: `${Math.round(backgroundAlphaByType[type])}%`,
-    borderAlpha: `${Math.round(borderAlphaByType[type])}%`,
-    glassStartAlpha: cssPercent(72 - transparentAmount * 36),
-    glassMiddleAlpha: cssPercent(46 - transparentAmount * 26),
-    glassEndAlpha: cssPercent(34 - transparentAmount * 22),
-    glassHighlightMix: cssPercent(8 + extraBlurAmount * 22),
-    glassDarkHighlightMix: cssPercent(5 + extraBlurAmount * 14),
-    glassBorderWhiteMix: cssPercent(28 + extraBlurAmount * 42),
-    glassDarkBorderWhiteMix: cssPercent(14 + extraBlurAmount * 24),
-    glassOutlineAlpha: cssAlpha(0.14 + extraBlurAmount * 0.28),
-    glassDarkOutlineAlpha: cssAlpha(0.08 + extraBlurAmount * 0.18),
-    glassShadowAlpha: cssAlpha(0.08 + extraBlurAmount * 0.2),
-    glassSecondaryShadowAlpha: cssAlpha(0.05 + extraBlurAmount * 0.12),
-    glassDarkShadowAlpha: cssAlpha(0.24 + extraBlurAmount * 0.28),
-    glassDarkSecondaryShadowAlpha: cssAlpha(0.16 + extraBlurAmount * 0.18),
-    glassInnerHighlightAlpha: cssAlpha(0.18 + extraBlurAmount * 0.42),
-    glassDarkInnerHighlightAlpha: cssAlpha(0.1 + extraBlurAmount * 0.2),
-    glassInnerLowlightAlpha: cssAlpha(0.06 + extraBlurAmount * 0.12),
-    glassDarkInnerLowlightAlpha: cssAlpha(0.04 + extraBlurAmount * 0.08),
-  };
-}
-
-function readDottedValue(input: Record<string, unknown>, dottedKey: string): unknown {
-  const nestedValue = dottedKey.split(".").reduce<unknown>((current, part) => {
-    if (!isRecord(current)) {
-      return undefined;
-    }
-
-    return current[part];
-  }, input);
-
-  if (nestedValue !== undefined) {
-    return nestedValue;
-  }
-
-  return input[dottedKey];
-}
-
-function stableStringify(value: unknown): string {
-  if (Array.isArray(value)) {
-    return `[${value.map(stableStringify).join(",")}]`;
-  }
-
-  if (isRecord(value)) {
-    return `{${Object.keys(value)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
-      .join(",")}}`;
-  }
-
-  return JSON.stringify(value);
-}
-
-function getManagedSettingsSignature(input: Record<string, unknown>): string {
-  return stableStringify(input);
-}
-
-function normalizeThemeConfig(config: Partial<ThemeConfig> | null | undefined): ThemeConfig {
-  return {
-    ...DEFAULT_THEME_CONFIG,
-    ...config,
-  };
-}
-
-function normalizeThemeConfigOverrides(input: unknown): Partial<ThemeConfig> {
-  if (!isRecord(input)) {
-    return {};
-  }
-
-  const result: Partial<ThemeConfig> = {};
-  const colorTheme = pickEnum(input.colorTheme, COLOR_THEMES);
-  const cardLayout = pickEnum(input.cardLayout, CARD_LAYOUTS);
-  const cardDesign = pickEnum(input.cardDesign, CARD_DESIGNS);
-  const statusDesign = pickEnum(input.statusDesign, STATUS_DESIGNS);
-  const graphDesign = pickEnum(input.graphDesign, GRAPH_DESIGNS);
-  const showRamDiskTotal = pickBoolean((input as any).showRamDiskTotal);
-  const backgroundImageUrl = pickString(input.backgroundImageUrl);
-  const backgroundBlurEnabled = pickBoolean(input.backgroundBlurEnabled);
-  const backgroundBlurType = pickBlurType(input.backgroundBlurType);
-  const backgroundBlurIntensity = pickNumber(input.backgroundBlurIntensity);
-  const backgroundMaskOpacity = pickNumber(input.backgroundMaskOpacity);
-  const cardBlurEnabled = pickBoolean(input.cardBlurEnabled);
-  const cardBlurType = pickBlurType(input.cardBlurType);
-  const cardBlurIntensity = pickNumber(input.cardBlurIntensity);
-  const cardExtraBlurIntensity = pickNumber(input.cardExtraBlurIntensity);
-
-  if (colorTheme) result.colorTheme = colorTheme;
-  if (cardLayout) result.cardLayout = cardLayout;
-  if (cardDesign) result.cardDesign = cardDesign;
-  if (statusDesign) result.statusDesign = statusDesign;
-  if (graphDesign) result.graphDesign = graphDesign;
-  if (showRamDiskTotal !== undefined) result.showRamDiskTotal = showRamDiskTotal;
-  if (backgroundImageUrl !== undefined) result.backgroundImageUrl = backgroundImageUrl;
-  if (backgroundBlurEnabled !== undefined) result.backgroundBlurEnabled = backgroundBlurEnabled;
-  if (backgroundBlurType) result.backgroundBlurType = backgroundBlurType;
-  if (backgroundBlurIntensity !== undefined) {
-    result.backgroundBlurIntensity = clampBackgroundBlurIntensity(backgroundBlurIntensity);
-  }
-  if (backgroundMaskOpacity !== undefined) {
-    result.backgroundMaskOpacity = clampBackgroundBlurIntensity(backgroundMaskOpacity);
-  }
-  if (cardBlurEnabled !== undefined) result.cardBlurEnabled = cardBlurEnabled;
-  if (cardBlurType) result.cardBlurType = cardBlurType;
-  if (cardBlurIntensity !== undefined) {
-    result.cardBlurIntensity = clampBackgroundBlurIntensity(cardBlurIntensity);
-  }
-  if (cardExtraBlurIntensity !== undefined) {
-    result.cardExtraBlurIntensity = clampBackgroundBlurIntensity(cardExtraBlurIntensity);
-  }
-
-  return result;
-}
-
-function normalizeStatusCardsVisibilityOverrides(input: unknown): Partial<StatusCardsVisibility> {
-  if (!isRecord(input)) {
-    return {};
-  }
-
-  const result: Partial<StatusCardsVisibility> = {};
-  (Object.keys(DEFAULT_STATUS_CARDS_VISIBILITY) as Array<keyof StatusCardsVisibility>).forEach((key) => {
-    const value = pickBoolean(input[key]);
-    if (value !== undefined) {
-      result[key] = value;
-    }
-  });
-
-  return result;
-}
-
-function normalizeGuestDisplaySettings(input: unknown): Partial<GuestDisplaySettings> {
-  if (!isRecord(input)) {
-    return {};
-  }
-
-  const result: Partial<GuestDisplaySettings> = {};
-  (Object.keys(DEFAULT_GUEST_DISPLAY_SETTINGS) as Array<keyof GuestDisplaySettings>).forEach((key) => {
-    const value = pickBoolean(input[key]);
-    if (value !== undefined) {
-      result[key] = value;
-    }
-  });
-
-  return result;
-}
-
-function normalizeUptimeKumaSettings(source: Record<string, unknown>): Partial<UptimeKumaSettings> {
-  const result: Partial<UptimeKumaSettings> = {};
-  const enabled = pickBoolean(readDottedValue(source, "uptimeKuma.enabled"));
-  const baseUrl = pickString(readDottedValue(source, "uptimeKuma.baseUrl"));
-  const slug = pickString(readDottedValue(source, "uptimeKuma.slug"));
-
-  if (enabled !== undefined) {
-    result.enabled = enabled;
-  }
-  if (baseUrl !== undefined) {
-    result.baseUrl = baseUrl.trim();
-  }
-  if (slug !== undefined) {
-    result.slug = slug.trim();
-  }
-
-  return result;
-}
-
-function normalizeManagedThemeSettings(input: unknown): ManagedThemeSettings {
-  const source = parseThemeSettings(input);
-  const result: ManagedThemeSettings = normalizeThemeConfigOverrides(source);
-  const logoUrl = pickString(readDottedValue(source, "logoUrl"));
-  const nodeViewMode = pickEnum(readDottedValue(source, "nodeViewMode"), NODE_VIEW_MODES);
-  const appearance = pickAppearance(readDottedValue(source, "appearance"));
-  const language = pickManagedLanguage(readDottedValue(source, "language"));
-  const statusCardsVisibility: Partial<StatusCardsVisibility> = {};
-  const guestDisplay: Partial<GuestDisplaySettings> =
-    normalizeGuestDisplaySettings(readDottedValue(source, "guestDisplay"));
-  const uptimeKuma = normalizeUptimeKumaSettings(source);
-
-  (Object.keys(DEFAULT_STATUS_CARDS_VISIBILITY) as Array<keyof StatusCardsVisibility>).forEach((key) => {
-    const value = pickBoolean(readDottedValue(source, `statusCardsVisibility.${key}`));
-    if (value !== undefined) {
-      statusCardsVisibility[key] = value;
-    }
-  });
-
-  (Object.keys(DEFAULT_GUEST_DISPLAY_SETTINGS) as Array<keyof GuestDisplaySettings>).forEach((key) => {
-    const value = pickBoolean(readDottedValue(source, `guestDisplay.${key}`));
-    if (value !== undefined) {
-      guestDisplay[key] = value;
-    }
-  });
-
-  if (Object.keys(statusCardsVisibility).length > 0) {
-    result.statusCardsVisibility = statusCardsVisibility;
-  }
-
-  if (Object.keys(guestDisplay).length > 0) {
-    result.guestDisplay = guestDisplay;
-  }
-
-  if (Object.keys(uptimeKuma).length > 0) {
-    result.uptimeKuma = uptimeKuma;
-  }
-
-  if (logoUrl !== undefined) {
-    result.logoUrl = logoUrl.trim();
-  }
-
-  if (nodeViewMode) {
-    result.nodeViewMode = nodeViewMode;
-  }
-
-  if (appearance) {
-    result.appearance = appearance;
-  }
-
-  if (language) {
-    result.language = language;
-  }
-
-  return result;
-}
-
-function extractLegacyThemeOverrides(input: unknown): Partial<ThemeConfig> {
-  const config = normalizeThemeConfigOverrides(input);
-  const result: Partial<ThemeConfig> = {};
-
-  (Object.keys(config) as Array<keyof ThemeConfig>).forEach((key) => {
-    if (config[key] !== DEFAULT_THEME_CONFIG[key]) {
-      result[key] = config[key] as never;
-    }
-  });
-
-  return result;
-}
-
-function readInitialThemeOverrides(): Partial<ThemeConfig> {
-  const current = normalizeThemeConfigOverrides(readJsonStorage(THEME_OVERRIDES_STORAGE_KEY));
-  if (Object.keys(current).length > 0) {
-    return current;
-  }
-
-  return extractLegacyThemeOverrides(readJsonStorage(LEGACY_THEME_STORAGE_KEY));
-}
-
-function readInitialStatusCardsOverrides(): Partial<StatusCardsVisibility> {
-  return normalizeStatusCardsVisibilityOverrides(readJsonStorage(STATUS_CARDS_STORAGE_KEY));
-}
-
-function readInitialNodeViewOverride(): NodeViewMode | undefined {
-  return pickEnum(readJsonStorage(NODE_VIEW_STORAGE_KEY), NODE_VIEW_MODES);
-}
-
-function readInitialAppearanceOverride(): Appearance | undefined {
-  return pickAppearance(readStringStorage(APPEARANCE_STORAGE_KEY));
-}
-
-function readInitialLanguageOverride(): string | undefined {
-  return normalizeLanguage(readStringStorage(LANGUAGE_STORAGE_KEY));
-}
-
-function hasLocalOverrides() {
-  return (
-    Object.keys(normalizeThemeConfigOverrides(readJsonStorage(THEME_OVERRIDES_STORAGE_KEY))).length > 0 ||
-    Object.keys(extractLegacyThemeOverrides(readJsonStorage(LEGACY_THEME_STORAGE_KEY))).length > 0 ||
-    Object.keys(normalizeStatusCardsVisibilityOverrides(readJsonStorage(STATUS_CARDS_STORAGE_KEY))).length > 0 ||
-    readInitialNodeViewOverride() !== undefined ||
-    readInitialAppearanceOverride() !== undefined ||
-    readInitialLanguageOverride() !== undefined
-  );
-}
 
 function dispatchCustomEvent<T>(eventName: string, detail: T) {
   if (typeof window === "undefined") {
@@ -708,79 +98,6 @@ function removeKeys<T extends Record<string, unknown>, K extends keyof T>(
   keys.forEach((key) => {
     delete next[key];
   });
-  return next;
-}
-
-function mergeManagedSettings(
-  current: Partial<ManagedThemeSettings> | Record<string, unknown>,
-  patch: ManagedThemeSettings
-): Record<string, unknown> {
-  const next: Record<string, unknown> = { ...(current as Record<string, unknown>) };
-
-  (
-    [
-      "colorTheme",
-      "cardLayout",
-      "cardDesign",
-      "statusDesign",
-      "graphDesign",
-      "showRamDiskTotal",
-      "backgroundImageUrl",
-      "backgroundBlurEnabled",
-      "backgroundBlurType",
-      "backgroundBlurIntensity",
-      "backgroundMaskOpacity",
-      "cardBlurEnabled",
-      "cardBlurType",
-      "cardBlurIntensity",
-      "cardExtraBlurIntensity",
-      "logoUrl",
-      "appearance",
-      "language",
-    ] as const
-  ).forEach((key) => {
-    if (patch[key] !== undefined) {
-      next[key] = patch[key];
-    }
-  });
-
-  if (patch.nodeViewMode !== undefined) {
-    next.nodeViewMode = patch.nodeViewMode;
-  }
-
-  if (patch.statusCardsVisibility) {
-    Object.keys(patch.statusCardsVisibility).forEach((key) => {
-      delete next[`statusCardsVisibility.${key}`];
-    });
-
-    next.statusCardsVisibility = {
-      ...(isRecord(next.statusCardsVisibility) ? next.statusCardsVisibility : {}),
-      ...patch.statusCardsVisibility,
-    };
-  }
-
-  if (patch.guestDisplay) {
-    Object.keys(patch.guestDisplay).forEach((key) => {
-      delete next[`guestDisplay.${key}`];
-    });
-
-    next.guestDisplay = {
-      ...(isRecord(next.guestDisplay) ? next.guestDisplay : {}),
-      ...patch.guestDisplay,
-    };
-  }
-
-  if (patch.uptimeKuma) {
-    Object.keys(patch.uptimeKuma).forEach((key) => {
-      delete next[`uptimeKuma.${key}`];
-    });
-
-    next.uptimeKuma = {
-      ...(isRecord(next.uptimeKuma) ? next.uptimeKuma : {}),
-      ...patch.uptimeKuma,
-    };
-  }
-
   return next;
 }
 
@@ -1420,3 +737,20 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
+
+export { DEFAULT_APPEARANCE, DEFAULT_GUEST_DISPLAY_SETTINGS, DEFAULT_NODE_VIEW_MODE, DEFAULT_STATUS_CARDS_VISIBILITY } from "./theme/constants";
+export type {
+  Appearance,
+  BackgroundBlurType,
+  CardBlurType,
+  CardDesign,
+  CardLayout,
+  ColorTheme,
+  GraphDesign,
+  GuestDisplaySettings,
+  ManagedThemeSettings,
+  NodeViewMode,
+  StatusCardsVisibility,
+  StatusDesign,
+  ThemeConfig,
+} from "./theme/types";

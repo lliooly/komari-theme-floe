@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useRef, useEffect, Suspense } from "react";
 import { Search, Grid3X3, Table2, X } from "@/components/Icones/Reicon";
 import { useTranslation } from "react-i18next";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useNodeViewMode } from "@/hooks/useNodeViewMode";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { LiveData } from "../types/LiveData";
-import { NodeGrid } from "./Node";
+import { NodeGrid } from "./NodeGrid";
 const NodeTable = React.lazy(() => import("./NodeTable"));
 import { isRegionMatch } from "@/utils/regionHelper";
 import "./NodeDisplay.css";

@@ -17,7 +17,6 @@ import { useRPC2Call } from "@/contexts/RPC2Context";
 import { fetchPingRecords, PING_RECORDS_AUTO_REFRESH_MS, type PingRecord, type PingTaskInfo } from "@/lib/pingRecords";
 // 移除旧 REST 类型，改用 RPC2 返回结构
 
-//const MAX_POINTS = 1000;
 const colors = [
   "#F38181",
   "#347433",

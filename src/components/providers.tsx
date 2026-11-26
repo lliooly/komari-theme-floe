@@ -8,11 +8,8 @@ import { RPC2Provider } from "@/contexts/RPC2Context"
 import { PublicInfoProvider } from "@/contexts/PublicInfoContext"
 import { Toaster } from "@/components/ui/sonner"
 import { OfflineIndicator } from "@/components/OfflineIndicator"
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt"
-import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt"
 import i18n, { detectClientLanguage } from "@/i18n/config"
 import ServiceWorkerRecovery from "@/components/ServiceWorkerRecovery"
-import SmoothCorners from "@/components/SmoothCorners"
 
 function I18nClientLanguageSync() {
   React.useEffect(() => {
@@ -34,7 +31,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <ServiceWorkerRecovery />
-      <SmoothCorners />
       <I18nClientLanguageSync />
       <ThemeProvider>
         <AnnouncementProvider>
@@ -43,8 +39,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
               {children}
               <Toaster />
               <OfflineIndicator />
-              <PWAInstallPrompt />
-              <PWAUpdatePrompt />
             </PublicInfoProvider>
           </RPC2Provider>
         </AnnouncementProvider>

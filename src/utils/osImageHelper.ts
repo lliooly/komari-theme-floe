@@ -210,23 +210,6 @@ export function getOSImage(osString: string): string {
 }
 
 /**
- * 获取所有可用的操作系统图像
- * @returns 所有操作系统图像的映射表
- */
-export function getAllOSImages(): Record<string, string> {
-  const imageMap: Record<string, string> = {};
-
-  osConfigs.forEach((config) => {
-    const key = config.keywords[0]; // 使用第一个关键词作为键
-    imageMap[key] = config.image;
-  });
-
-  imageMap.unknown = defaultOSConfig.image;
-
-  return imageMap;
-}
-
-/**
  * 根据输入字符串匹配返回操作系统名称
  * @param osString - 操作系统相关的字符串
  * @returns 匹配的操作系统名称
@@ -247,16 +230,4 @@ export function getOSName(osString: string): string {
   // 使用空格或斜杠分割，取第一个部分
   const parts = osString.trim().split(/[\s/]/);
   return parts[0] || "Unknown";
-}
-
-/**
- * 检查是否为支持的操作系统
- * @param osString - 操作系统相关的字符串
- * @returns 是否为支持的操作系统
- */
-export function isSupportedOS(osString: string): boolean {
-  if (!osString) return false;
-
-  const config = findOSConfig(osString);
-  return config !== defaultOSConfig;
 }

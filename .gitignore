@@ -82,3 +82,7 @@ bundle-analysis.html
 
 # Testing
 *.lcov
+
+# Patch and merge leftovers
+*.orig
+*.rej

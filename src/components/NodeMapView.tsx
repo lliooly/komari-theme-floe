@@ -6,7 +6,7 @@ import { geoGraticule10, geoNaturalEarth1, geoPath } from "d3-geo";
 import { MapPinned } from "@/components/Icones/Reicon";
 import { feature } from "topojson-client";
 import { useTranslation } from "react-i18next";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { LiveData } from "@/types/LiveData";

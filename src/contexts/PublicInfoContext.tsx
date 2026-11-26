@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-//import { useRPC2Call } from "./RPC2Context";
 
 export interface PublicInfo {
   allow_cors: boolean;
@@ -45,7 +44,6 @@ export const PublicInfoProvider: React.FC<{ children: React.ReactNode }> = ({
   const [publicInfo, setPublicInfo] = React.useState<PublicInfo | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
-  //const { call } = useRPC2Call();
   // 公共信息使用public，避免在私有站点的情况下RPC返回401
   const refresh = () => {
     setError(null);

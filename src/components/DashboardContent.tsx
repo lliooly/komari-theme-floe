@@ -10,7 +10,7 @@ import {
   MapPoint,
   Users,
 } from "@/components/Icones/Reicon";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

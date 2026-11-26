@@ -19,7 +19,7 @@ import {
   formatUptime,
   getTrafficPercentage,
   getTrafficUsed,
-} from "./Node";
+} from "@/utils/nodeMetrics";
 import { formatBytes } from "@/utils/unitHelper";
 import AdaptiveChart from "./AdaptiveChart";
 import Flag from "./Flag";
@@ -28,10 +28,10 @@ import Tips from "./ui/tips";
 import { DetailsGrid } from "./DetailsGrid";
 import MiniPingChart from "./MiniPingChart";
 import SpaLink from "./SpaLink";
-import { getOSImage } from "@/utils";
+import { getOSImage } from "@/utils/osImageHelper";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { getRevealProps } from "@/lib/reveal";
 
 interface NodeTableProps {
